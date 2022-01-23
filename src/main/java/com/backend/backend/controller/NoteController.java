@@ -1,8 +1,8 @@
-package com.backend.backend.note;
+package com.backend.backend.controller;
 
-import java.util.List;
-import java.util.Map;
-
+import com.backend.backend.dto.CreateNoteDto;
+import com.backend.backend.entity.NoteEntity;
+import com.backend.backend.service.NoteService;
 import com.backend.backend.util.ResponseHandler;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +28,20 @@ public class NoteController {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAll());
         } catch (Exception e) {
-            return ResponseHandler.generateResponse("error", HttpStatus.BAD_REQUEST, e.getMessage());
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
-    @GetMapping("/{userId}")
+    @GetMapping("/{noteId}")
+    public ResponseEntity<Object> getSingleNote(@PathVariable String noteId) {
+        try {
+            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(noteId));
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @GetMapping("/user/{userId}")
     public ResponseEntity<Object> getUserNotes(@PathVariable String userId) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAllByUserId(userId));
@@ -42,17 +51,14 @@ public class NoteController {
     }
 
     @PostMapping()
-    public Object createNote(@RequestBody NoteDto noteDto) {
+    public Object createNote(@RequestBody CreateNoteDto noteDto) {
         try {
-            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED, this.noteService.createNote(note));
-            return null;
-            // return ResponseHandler.generateResponse("success", HttpStatus.OK,
-            // this.noteService.createNote(note));
+            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
+                    this.noteService.createNote(noteDto));
         } catch (Exception e) {
             // TODO need more error handling details here.
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
-
     }
 
     @PostMapping("/updateNote")

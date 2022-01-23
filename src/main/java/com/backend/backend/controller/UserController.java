@@ -1,5 +1,7 @@
-package com.backend.backend.user;
+package com.backend.backend.controller;
 
+import com.backend.backend.entity.UserEntity;
+import com.backend.backend.service.UserService;
 import com.backend.backend.util.ResponseHandler;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,21 +26,16 @@ public class UserController {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getAll());
         } catch (Exception e) {
-            return ResponseHandler.generateResponse("error", HttpStatus.NOT_FOUND, "Not found");
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, null);
         }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getUserWithId(@PathVariable String id) {
         try {
-            var foundUser = this.userService.getUser(id);
-            if (foundUser.isPresent()) {
-                return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getUser(id));
-            } else {
-                return ResponseHandler.generateResponse("User not found", HttpStatus.BAD_REQUEST, null);
-            }
+            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getUserWithDto(id));
         } catch (Exception e) {
-            return ResponseHandler.generateResponse("error", HttpStatus.BAD_REQUEST, "Invalid credentials");
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
@@ -47,7 +44,8 @@ public class UserController {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.createUser(paramUser));
         } catch (Exception e) {
-            return ResponseHandler.generateResponse("error", HttpStatus.NOT_FOUND, "Not found");
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, "Not found");
         }
     }
+
 }

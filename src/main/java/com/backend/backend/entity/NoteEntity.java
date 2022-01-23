@@ -1,22 +1,17 @@
-package com.backend.backend.note;
+package com.backend.backend.entity;
 
 import java.util.Date;
-
-import com.backend.backend.user.UserEntity;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
 @Document(collection = "notes")
+@Data
 public class NoteEntity {
 
     @Id
@@ -25,8 +20,7 @@ public class NoteEntity {
 
     private Boolean completed = false;
 
-    @Field(name = "user")
-    @DBRef(db = "users")
+    @DBRef
     private UserEntity user;
 
     @CreatedDate
