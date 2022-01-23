@@ -1,4 +1,4 @@
-package com.backend.backend.entity;
+package com.backend.backend.model;
 
 import java.util.Date;
 

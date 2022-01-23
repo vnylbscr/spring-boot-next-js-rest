@@ -5,11 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.backend.backend.dto.GetUserDto;
-import com.backend.backend.entity.UserEntity;
+import com.backend.backend.model.UserEntity;
 import com.backend.backend.repository.UserRepository;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.Data;
@@ -17,13 +16,13 @@ import lombok.Data;
 @Data
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
 
-    private ModelMapper modelMapper;
+    private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
-    public UserService(ModelMapper modelMapper) {
+    public UserService(ModelMapper modelMapper, UserRepository userRepository) {
         this.modelMapper = modelMapper;
+        this.userRepository = userRepository;
     }
 
     public Optional<UserEntity> getUser(String id) {
@@ -38,10 +37,10 @@ public class UserService {
     public List<GetUserDto> getAll() {
         var users = this.userRepository.findAll();
         List<GetUserDto> usersResp = new ArrayList<>();
-        for (UserEntity userEntity : users) {
-            GetUserDto gto = modelMapper.map(userEntity, GetUserDto.class);
+        users.forEach(user -> {
+            GetUserDto gto = modelMapper.map(user, GetUserDto.class);
             usersResp.add(gto);
-        }
+        });
         return usersResp;
     }
 

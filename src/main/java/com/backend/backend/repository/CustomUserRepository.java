@@ -1,6 +1,6 @@
 package com.backend.backend.repository;
 
-import com.backend.backend.entity.UserEntity;
+import com.backend.backend.model.UserEntity;
 
 public interface CustomUserRepository {
 

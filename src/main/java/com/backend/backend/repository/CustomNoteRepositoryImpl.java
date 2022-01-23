@@ -2,7 +2,7 @@ package com.backend.backend.repository;
 
 import java.util.List;
 
-import com.backend.backend.entity.NoteEntity;
+import com.backend.backend.model.NoteEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;

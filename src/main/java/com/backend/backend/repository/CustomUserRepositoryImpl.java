@@ -1,6 +1,6 @@
 package com.backend.backend.repository;
 
-import com.backend.backend.entity.UserEntity;
+import com.backend.backend.model.UserEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;

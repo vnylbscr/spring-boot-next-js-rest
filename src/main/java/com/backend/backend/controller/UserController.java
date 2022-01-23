@@ -1,6 +1,6 @@
 package com.backend.backend.controller;
 
-import com.backend.backend.entity.UserEntity;
+import com.backend.backend.model.UserEntity;
 import com.backend.backend.service.UserService;
 import com.backend.backend.util.ResponseHandler;
 

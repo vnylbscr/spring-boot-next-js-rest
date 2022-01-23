@@ -7,35 +7,35 @@ import java.util.Optional;
 
 import com.backend.backend.dto.CreateNoteDto;
 import com.backend.backend.dto.GetNoteDto;
-import com.backend.backend.entity.NoteEntity;
-import com.backend.backend.entity.UserEntity;
+import com.backend.backend.exception.ResponseException;
+import com.backend.backend.model.NoteEntity;
+import com.backend.backend.model.UserEntity;
 import com.backend.backend.repository.NoteRepository;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
 public class NoteService {
 
-    private UserService userService;
-    @Autowired
-    private NoteRepository noteReposity;
+    private final UserService userService;
+    private final NoteRepository noteReposity;
+    private final ModelMapper modelMapper;
 
-    private ModelMapper modelMapper;
-
-    public NoteService(UserService userService, ModelMapper modelMapper) {
+    public NoteService(UserService userService, ModelMapper modelMapper, NoteRepository noteRepository) {
         this.userService = userService;
         this.modelMapper = modelMapper;
+        this.noteReposity = noteRepository;
     }
 
     public List<GetNoteDto> getAll() {
         var notes = noteReposity.findAll();
         List<GetNoteDto> noteDtos = new ArrayList<>();
-        for (NoteEntity noteEntity : notes) {
-            GetNoteDto nto = modelMapper.map(noteEntity, GetNoteDto.class);
+        notes.forEach((note) -> {
+            GetNoteDto nto = modelMapper.map(note, GetNoteDto.class);
             noteDtos.add(nto);
-        }
+        });
         return noteDtos;
     }
 
@@ -48,10 +48,10 @@ public class NoteService {
         return noteReposity.getAllByUserId(userId);
     }
 
-    public NoteEntity createNote(CreateNoteDto noteDto) {
+    public NoteEntity createNote(CreateNoteDto noteDto) throws ResponseException {
         UserEntity user = userService.getUser(noteDto.getUserId()).get();
         if (user.getId() == null) {
-            throw new Error("User not exist.");
+            throw new ResponseException("User not exist.", HttpStatus.NOT_FOUND);
         }
         NoteEntity note = new NoteEntity();
         note.setCreatedAt(new Date());

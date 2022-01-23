@@ -1,7 +1,8 @@
 package com.backend.backend.controller;
 
 import com.backend.backend.dto.CreateNoteDto;
-import com.backend.backend.entity.NoteEntity;
+import com.backend.backend.exception.ResponseException;
+import com.backend.backend.model.NoteEntity;
 import com.backend.backend.service.NoteService;
 import com.backend.backend.util.ResponseHandler;
 
@@ -55,9 +56,8 @@ public class NoteController {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
                     this.noteService.createNote(noteDto));
-        } catch (Exception e) {
-            // TODO need more error handling details here.
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        } catch (ResponseException e) {
+            return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
         }
     }
 

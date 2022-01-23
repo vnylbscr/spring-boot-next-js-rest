@@ -1,6 +1,6 @@
 package com.backend.backend.repository;
 
-import com.backend.backend.entity.NoteEntity;
+import com.backend.backend.model.NoteEntity;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
