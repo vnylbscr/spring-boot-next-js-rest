@@ -25,7 +25,7 @@ public class NoteController {
     private NoteService noteService;
 
     @GetMapping(value = "/getAll")
-    public ResponseEntity<Object> getAllNotes() {
+    public ResponseEntity<?> getAllNotes() {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAll());
         } catch (Exception e) {
@@ -34,7 +34,7 @@ public class NoteController {
     }
 
     @GetMapping("/{noteId}")
-    public ResponseEntity<Object> getSingleNote(@PathVariable String noteId) {
+    public ResponseEntity<?> getSingleNote(@PathVariable String noteId) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(noteId));
         } catch (Exception e) {
@@ -43,7 +43,7 @@ public class NoteController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Object> getUserNotes(@PathVariable String userId) {
+    public ResponseEntity<?> getUserNotes(@PathVariable String userId) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAllByUserId(userId));
         } catch (Exception e) {
@@ -52,7 +52,7 @@ public class NoteController {
     }
 
     @PostMapping()
-    public Object createNote(@RequestBody CreateNoteDto noteDto) {
+    public ResponseEntity<?> createNote(@RequestBody CreateNoteDto noteDto) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
                     this.noteService.createNote(noteDto));
@@ -62,7 +62,7 @@ public class NoteController {
     }
 
     @PostMapping("/updateNote")
-    public ResponseEntity<Object> updateNote(@RequestParam NoteEntity note) {
+    public ResponseEntity<?> updateNote(@RequestParam NoteEntity note) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.updateNote(note));
         } catch (Exception e) {

@@ -22,7 +22,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public ResponseEntity<Object> getAll() {
+    public ResponseEntity<?> getAll() {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getAll());
         } catch (Exception e) {
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getUserWithId(@PathVariable String id) {
+    public ResponseEntity<?> getUserWithId(@PathVariable String id) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getUserWithDto(id));
         } catch (Exception e) {
@@ -40,7 +40,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createUser(@RequestBody UserEntity paramUser) {
+    public ResponseEntity<?> createUser(@RequestBody UserEntity paramUser) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.createUser(paramUser));
         } catch (Exception e) {
