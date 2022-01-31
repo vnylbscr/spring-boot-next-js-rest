@@ -1,9 +1,9 @@
 export interface LoginState {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface RegisterState extends LoginState {
-  email: string;
+  username: string;
   passwordConfirm: string;
 }

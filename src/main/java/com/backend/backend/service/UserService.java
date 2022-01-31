@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Optional;
 
 import com.backend.backend.dto.GetUserDto;
+import com.backend.backend.exception.ResponseException;
 import com.backend.backend.model.UserEntity;
 import com.backend.backend.repository.UserRepository;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.Data;
@@ -19,13 +22,19 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(ModelMapper modelMapper, UserRepository userRepository) {
+    public UserService(ModelMapper modelMapper, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.modelMapper = modelMapper;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public Optional<UserEntity> getUser(String id) {
+    public Optional<GetUserDto> getUser(String id) {
+        return Optional.of(modelMapper.map(this.userRepository.findById(id), GetUserDto.class));
+    }
+
+    public Optional<UserEntity> getUserWithEntity(String id) {
         return this.userRepository.findById(id);
     }
 
@@ -44,14 +53,35 @@ public class UserService {
         return usersResp;
     }
 
-    public UserEntity createUser(UserEntity user) {
-        var foundUser = this.userRepository.findByUsername(user.getUsername());
-        if (foundUser != null)
-            throw new Error("User already exist.");
-        return this.userRepository.save(user);
+    public List<UserEntity> getAllWithPassword() {
+        return userRepository.findAll();
     }
 
-    public UserEntity updateUser(UserEntity user) {
+    public GetUserDto createUser(UserEntity user) throws ResponseException {
+        var foundUser = this.userRepository.findByEmail(user.getEmail());
+        if (foundUser != null)
+            throw new ResponseException("User already exist.", HttpStatus.BAD_REQUEST);
+        // hashing password
+        String password = user.getPassword();
+        String hashedPassword = passwordEncoder.encode(password);
+        user.setPassword(hashedPassword);
+        UserEntity savedUser = this.userRepository.save(user);
+        return modelMapper.map(savedUser, GetUserDto.class);
+    }
+
+    public GetUserDto updateUser(UserEntity user) throws ResponseException {
         return this.createUser(user);
     }
+
+    public GetUserDto getByEmail(String email) {
+        var foundUser = userRepository.findByEmail(email);
+        GetUserDto response = modelMapper.map(foundUser, GetUserDto.class);
+        return response;
+    }
+
+    public UserEntity getByEmailWithEntity(String email) {
+        var foundUser = userRepository.findByEmail(email);
+        return foundUser;
+    }
+
 }

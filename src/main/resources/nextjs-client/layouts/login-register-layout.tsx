@@ -11,13 +11,10 @@ const LoginRegisterLayout: React.FC<{
       alignItems={"center"}
       justifyContent={"center"}
       color={"#fff"}
+      bgImage={"https://wallpaperaccess.com/full/334698.jpg"}
+      backgroundSize={"cover"}
     >
-      <Container
-        background={"gray.800"}
-        borderRadius={"md"}
-        maxW={"md"}
-        p={"12"}
-      >
+      <Container borderRadius={"md"} maxW={"md"} p={"12"} bgColor={"gray.800"}>
         {children}
       </Container>
     </Flex>

@@ -49,7 +49,7 @@ public class NoteService {
     }
 
     public NoteEntity createNote(CreateNoteDto noteDto) throws ResponseException {
-        UserEntity user = userService.getUser(noteDto.getUserId()).get();
+        UserEntity user = userService.getUserWithEntity(noteDto.getUserId()).get();
         if (user.getId() == null) {
             throw new ResponseException("User not exist.", HttpStatus.NOT_FOUND);
         }

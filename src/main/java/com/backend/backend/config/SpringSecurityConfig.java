@@ -1,5 +1,6 @@
 package com.backend.backend.config;
 
+import com.backend.backend.security.AuthEntryPoint;
 import com.backend.backend.security.JwtTokenFilter;
 import com.backend.backend.security.UserDetailsService;
 
@@ -25,6 +26,9 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtTokenFilter jwtTokenFilter;
 
     @Autowired
+    private AuthEntryPoint authEntryPoint;
+
+    @Autowired
     private UserDetailsService userDetailsService;
 
     @Autowired
@@ -47,7 +51,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable()
                 .authorizeRequests().antMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated()
-                .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .and().exceptionHandling().authenticationEntryPoint(authEntryPoint).and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }

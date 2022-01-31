@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootTest
 public class UserServiceTest {
@@ -20,12 +21,14 @@ public class UserServiceTest {
     private UserService userService;
     private ModelMapper modelMapper;
     private UserRepository userRepository;
+    private BCryptPasswordEncoder passwordEncoder;
 
     @BeforeEach
     public void setUp() {
         modelMapper = Mockito.mock(ModelMapper.class);
         userRepository = Mockito.mock(UserRepository.class);
-        userService = new UserService(modelMapper, userRepository);
+        passwordEncoder = Mockito.mock(BCryptPasswordEncoder.class);
+        userService = new UserService(modelMapper, userRepository, passwordEncoder);
     }
 
     @Test
@@ -40,7 +43,7 @@ public class UserServiceTest {
     }
 
     public void shouldGetAllUserSuccessfully() {
-        
+
     }
 
 }

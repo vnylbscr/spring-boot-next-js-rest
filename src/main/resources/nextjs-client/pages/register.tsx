@@ -1,12 +1,24 @@
-import { Button, Heading, Stack, Link as ChakraLink } from "@chakra-ui/react";
+import {
+  Button,
+  Heading,
+  Stack,
+  Link as ChakraLink,
+  Text,
+  Alert,
+  AlertIcon,
+} from "@chakra-ui/react";
+import { REGEX } from "@lib/constants";
+import { useRegisterMutation } from "@services/user.service";
 import Link from "next/link";
-import React from "react";
+import { useRouter } from "next/router";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import MyInput from "../components/input/my-input";
+import MyInput from "../components/my-input";
 import LoginRegisterLayout from "../layouts/login-register-layout";
 import { RegisterState } from "../types";
 
 const RegisterPage = () => {
+  const { error, isLoading, mutateAsync, data } = useRegisterMutation();
   const { control, handleSubmit, watch } = useForm<RegisterState>({
     defaultValues: {
       username: "",
@@ -15,9 +27,22 @@ const RegisterPage = () => {
       passwordConfirm: "",
     },
   });
+  const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const onSubmitForm = handleSubmit((data) => {
-    console.log("data ", data);
+    mutateAsync(data)
+      .then(() => {
+        setMessage("Submit successfull. You redirect to the login page.");
+        setTimeout(() => {
+          router.push({
+            pathname: "/login",
+          });
+        }, 3000);
+      })
+      .catch((err) => {
+        console.log("err", err);
+      });
   });
 
   return (
@@ -33,9 +58,8 @@ const RegisterPage = () => {
             rules={{
               required: "This field is required",
               pattern: {
-                message: "Please provide a valid email.",
-                value:
-                  /^(([^<>()[\].,;:\s@"]+(\.[^<>()[\].,;:\s@"]+)*)|(".+"))@(([^<>()[\].,;:\s@"]+\.)+[^<>()[\].,;:\s@"]{2,})$/i,
+                message: "Please provide a valid email address.",
+                value: REGEX.EMAIL,
               },
             }}
             renderStyleProps={{
@@ -88,16 +112,28 @@ const RegisterPage = () => {
             }}
           />
 
-          <Button type={"submit"} colorScheme={"teal"}>
+          <Button isLoading={isLoading} type={"submit"} colorScheme={"teal"}>
             Register
           </Button>
-          <Heading textAlign={"center"} fontSize={"sm"}>
+          <Heading py={2} textAlign={"center"} fontSize={"sm"}>
             You already have an account?{" "}
-            <Link href={"/login"}>
-              <ChakraLink color={"teal"}>Register</ChakraLink>
+            <Link passHref href={"/login"}>
+              <ChakraLink color={"teal"}>Login</ChakraLink>
             </Link>
           </Heading>
         </Stack>
+        {error && (
+          <Alert mt={4} borderRadius={4} color={"black"} status="error">
+            <AlertIcon />
+            Something went wrong
+          </Alert>
+        )}
+        {message && (
+          <Alert mt={4} borderRadius={4} color={"black"} status="success">
+            <AlertIcon />
+            {message}
+          </Alert>
+        )}
       </form>
     </LoginRegisterLayout>
   );

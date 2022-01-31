@@ -1,28 +1,45 @@
 import {
+  Alert,
+  AlertIcon,
   Button,
-  Container,
-  Flex,
   Heading,
   Link as ChakraLink,
   Stack,
 } from "@chakra-ui/react";
+import MyInput from "@components/my-input";
+import LoginRegisterLayout from "@layouts/login-register-layout";
+import { REGEX } from "@lib/constants";
+import { useLoginMutation } from "@services/user.service";
+import Link from "next/link";
 import React, { Fragment } from "react";
 import { useForm } from "react-hook-form";
-import MyInput from "../components/input/my-input";
-import LoginRegisterLayout from "../layouts/login-register-layout";
-import { LoginState } from "../types";
-import Link from "next/link";
+import { LoginState } from "types";
 
 const LoginPage = () => {
-  const { control, handleSubmit } = useForm<LoginState>({
+  const { error, mutateAsync, isLoading } = useLoginMutation();
+  const { control, handleSubmit, reset } = useForm<LoginState>({
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
-  const onSubmitForm = handleSubmit((data) => {
-    console.log("data", data);
+  const onSubmitForm = handleSubmit(async (data) => {
+    mutateAsync(data)
+      .then(
+        ({
+          data: {
+            data: { user, token },
+          },
+        }) => {
+          sessionStorage.setItem("user", JSON.stringify(user));
+          sessionStorage.setItem("token", token);
+        }
+      )
+      .catch((err) => {
+        console.log("error", err.message);
+        reset({ email: "", password: "" });
+      });
   });
 
   return (
@@ -36,13 +53,18 @@ const LoginPage = () => {
           <Stack spacing={3}>
             <MyInput
               control={control}
-              name={"username"}
+              name={"email"}
               rules={{
                 required: "This field is required",
+                pattern: {
+                  value: REGEX.EMAIL,
+                  message: "Please provide a valid e-mail address.",
+                },
               }}
               renderStyleProps={{
-                placeholder: "Username or e-mail",
+                placeholder: "E-mail",
                 variant: "flushed",
+                type: "text",
               }}
             />
             <MyInput
@@ -61,18 +83,23 @@ const LoginPage = () => {
                 type: "password",
               }}
             />
-
-            <Button type={"submit"} colorScheme={"teal"}>
+            <Button isLoading={isLoading} type={"submit"} colorScheme={"teal"}>
               Login
             </Button>
-            <Heading textAlign={"center"} fontSize={"sm"}>
-              You don't have account?{" "}
-              <Link href={"/register"}>
+            <Heading py={2} textAlign={"center"} fontSize={"sm"}>
+              You don&lsquo;t have account?{" "}
+              <Link passHref={true} href={"/register"}>
                 <ChakraLink color={"teal"}>Register</ChakraLink>
               </Link>
             </Heading>
           </Stack>
         </form>
+        {error && (
+          <Alert mt={4} borderRadius={4} color={"black"} status="error">
+            <AlertIcon />
+            Something went wrong. Check your credentials.
+          </Alert>
+        )}
       </Fragment>
     </LoginRegisterLayout>
   );

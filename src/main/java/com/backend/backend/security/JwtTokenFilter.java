@@ -8,6 +8,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -18,6 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final TokenManager tokenManager;
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenFilter.class);
 
     public JwtTokenFilter(TokenManager tokenManager) {
         this.tokenManager = tokenManager;
@@ -36,6 +40,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.contains("Bearer")) {
             token = authHeader.split("\\s+")[1];
 
+            System.out.println("token is " + token);
             try {
                 email = tokenManager.getSubject(token);
             } catch (Exception e) {
@@ -52,6 +57,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(upassToken);
             }
         }
+
+        response.setHeader("refreshToken", "merto lala");
 
         filterChain.doFilter(request, response);
     }
