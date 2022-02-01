@@ -40,7 +40,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.contains("Bearer")) {
             token = authHeader.split("\\s+")[1];
 
-            System.out.println("token is " + token);
+            logger.info("token is", token);
+
             try {
                 email = tokenManager.getSubject(token);
             } catch (Exception e) {

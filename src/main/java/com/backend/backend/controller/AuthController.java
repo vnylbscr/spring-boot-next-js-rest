@@ -3,7 +3,6 @@ package com.backend.backend.controller;
 import com.backend.backend.exception.ResponseException;
 import com.backend.backend.http.LoginRequest;
 import com.backend.backend.http.RegisterRequest;
-import com.backend.backend.security.TokenManager;
 import com.backend.backend.service.AuthService;
 import com.backend.backend.util.ResponseHandler;
 
@@ -20,9 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-
-    @Autowired
-    private TokenManager tokenManager;
 
     @Autowired
     private AuthenticationManager authenticationManager;
