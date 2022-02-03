@@ -5,13 +5,16 @@ import {
   Heading,
   Link as ChakraLink,
   Stack,
+  useColorMode,
 } from "@chakra-ui/react";
 import MyInput from "@components/my-input";
 import LoginRegisterLayout from "@layouts/login-register-layout";
 import { REGEX } from "@lib/constants";
 import { useLoginMutation } from "@services/user.service";
+import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
-import React, { Fragment } from "react";
+import { useRouter } from "next/router";
+import React, { Fragment, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { LoginState } from "types";
 
@@ -23,17 +26,19 @@ const LoginPage = () => {
       password: "",
     },
   });
+  const router = useRouter();
 
   const onSubmitForm = handleSubmit(async (data) => {
     mutateAsync(data)
       .then(
         ({
           data: {
-            data: { user, token },
+            data: { user },
           },
         }) => {
-          sessionStorage.setItem("user", JSON.stringify(user));
-          sessionStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
+          const returnUrl = (router.query.returnUrl || "/") as string;
+          router.push(returnUrl);
         }
       )
       .catch((err) => {
@@ -95,7 +100,7 @@ const LoginPage = () => {
           </Stack>
         </form>
         {error && (
-          <Alert mt={4} borderRadius={4} color={"black"} status="error">
+          <Alert mt={4} borderRadius={4} color={"#fff"} status="error">
             <AlertIcon />
             Something went wrong. Check your credentials.
           </Alert>
@@ -104,5 +109,20 @@ const LoginPage = () => {
     </LoginRegisterLayout>
   );
 };
+
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  if (context.req.headers?.cookie?.includes("token")) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+}
 
 export default LoginPage;

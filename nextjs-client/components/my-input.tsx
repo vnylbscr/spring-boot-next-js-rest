@@ -28,8 +28,6 @@ const MyInput = <T extends FieldValues>(props: Props<T>) => {
         <Fragment>
           <InputGroup>
             <Input
-              {...renderStyleProps}
-              {...field}
               isInvalid={Boolean(error?.message)}
               type={
                 renderStyleProps?.type === "password"
@@ -38,6 +36,8 @@ const MyInput = <T extends FieldValues>(props: Props<T>) => {
                     : "password"
                   : "text"
               }
+              {...renderStyleProps}
+              {...field}
             />
             {renderStyleProps?.type === "password" && field.value && (
               <InputRightElement>

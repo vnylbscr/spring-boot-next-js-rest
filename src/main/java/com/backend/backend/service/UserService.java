@@ -45,12 +45,8 @@ public class UserService {
 
     public List<GetUserDto> getAll() {
         var users = this.userRepository.findAll();
-        List<GetUserDto> usersResp = new ArrayList<>();
-        users.forEach(user -> {
-            GetUserDto gto = modelMapper.map(user, GetUserDto.class);
-            usersResp.add(gto);
-        });
-        return usersResp;
+
+        return convertUserDtos(users);
     }
 
     public List<UserEntity> getAllWithPassword() {
@@ -82,6 +78,19 @@ public class UserService {
     public UserEntity getByEmailWithEntity(String email) {
         var foundUser = userRepository.findByEmail(email);
         return foundUser;
+    }
+
+    public void deleteUser(String id) {
+        this.userRepository.deleteById(id);
+    }
+
+    private List<GetUserDto> convertUserDtos(List<UserEntity> users) {
+        List<GetUserDto> usersResp = new ArrayList<>();
+        users.forEach(user -> {
+            GetUserDto gto = modelMapper.map(user, GetUserDto.class);
+            usersResp.add(gto);
+        });
+        return usersResp;
     }
 
 }

@@ -31,12 +31,7 @@ public class NoteService {
 
     public List<GetNoteDto> getAll() {
         var notes = noteReposity.findAll();
-        List<GetNoteDto> noteDtos = new ArrayList<>();
-        notes.forEach((note) -> {
-            GetNoteDto nto = modelMapper.map(note, GetNoteDto.class);
-            noteDtos.add(nto);
-        });
-        return noteDtos;
+        return convertNoteDtos(notes);
     }
 
     public GetNoteDto getSingleNote(String id) {
@@ -44,8 +39,9 @@ public class NoteService {
         return modelMapper.map(note, GetNoteDto.class);
     }
 
-    public List<NoteEntity> getAllByUserId(String userId) {
-        return noteReposity.getAllByUserId(userId);
+    public List<GetNoteDto> getAllByUserId(String userId) {
+        var notes = noteReposity.getAllByUserId(userId);
+        return convertNoteDtos(notes);
     }
 
     public NoteEntity createNote(CreateNoteDto noteDto) throws ResponseException {
@@ -71,6 +67,14 @@ public class NoteService {
             return noteReposity.save(note);
         }
         return null;
+    }
+
+    private List<GetNoteDto> convertNoteDtos(List<NoteEntity> notes) {
+        List<GetNoteDto> noteDtos = new ArrayList<>();
+        notes.forEach(note -> {
+            noteDtos.add(modelMapper.map(note, GetNoteDto.class));
+        });
+        return noteDtos;
     }
 
 }

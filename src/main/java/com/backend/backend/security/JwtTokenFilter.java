@@ -49,17 +49,34 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
         }
 
+        // Handle refresh token requests separately
+
+        if (email != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null &&
+                token != null) { // If token is valid
+            logger.info("Authentication passed for user: {}", email);
+
+            // Create a new authentication
+            var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+            // Set the authentication in Spring Security's context
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+
         if (email != null && token != null
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (tokenManager.validateToken(token)) {
-                UsernamePasswordAuthenticationToken upassToken = new UsernamePasswordAuthenticationToken(email, null,
-                        new ArrayList<>());
-                upassToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(upassToken);
+
+                // Create a new authentication
+                var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Set the authentication in Spring Security's context
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
             }
         }
-
-        response.setHeader("refreshToken", "merto lala");
 
         filterChain.doFilter(request, response);
     }
