@@ -84,6 +84,8 @@ public class UserService {
         this.userRepository.deleteById(id);
     }
 
+   
+
     private List<GetUserDto> convertUserDtos(List<UserEntity> users) {
         List<GetUserDto> usersResp = new ArrayList<>();
         users.forEach(user -> {

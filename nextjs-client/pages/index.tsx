@@ -1,5 +1,6 @@
 import {
   Box,
+  Collapse,
   Container,
   Fade,
   Flex,
@@ -7,12 +8,14 @@ import {
   Stack,
   Text,
   useColorModeValue,
+  useOutsideClick,
 } from "@chakra-ui/react";
 import MyInput from "@components/my-input";
 import AppLayout from "@layouts/appLayout";
+import customRequest from "@services/request";
 import axios from "axios";
-import type { GetServerSidePropsContext, NextPage } from "next";
-import { useState } from "react";
+import type { GetServerSidePropsContext } from "next";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { dehydrate, QueryClient } from "react-query";
 
@@ -26,19 +29,17 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery("user", () => {
-    return axios.get("/api/user", {
+  const data = axios
+    .get("/auth/verify", {
       headers: {
-        Authorization: context.req.headers.cookie || "",
+        token: context.req.headers.cookie.split("token=")[1].split(";")[0],
       },
-    });
-  });
+    })
+    .then((res) => res.data);
 
   return {
     props: {
-      user: dehydrate(queryClient),
+      token: context.req.headers?.cookie?.split("token=")[1],
     },
   };
 }
@@ -79,6 +80,13 @@ const Home = (props: any) => {
   });
   const [focused, setFocused] = useState(false);
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useOutsideClick({
+    ref: inputRef,
+    handler: () => setFocused(false),
+  });
+
   const onSubmitForm = handleSubmit(async (data) => {
     console.log(data);
   });
@@ -95,46 +103,46 @@ const Home = (props: any) => {
           h={"full"}
         >
           <Heading>Welcome, Mert</Heading>
-          <Container p={16} maxW={"4xl"}>
+          <Container p={4} maxW={"4xl"}>
             <Flex
               overflowY={"auto"}
               direction={"column"}
               justify={"center"}
               align="center"
             >
-              <form onSubmit={onSubmitForm} style={{ width: "100%" }}>
-                {
-                  <Fade in={focused}>
-                    <MyInput
-                      control={control}
-                      name={"title"}
-                      renderStyleProps={{
-                        width: "full",
-                        height: "40px",
-                        fontSize: 20,
-                        placeholder: "Enter title",
-                        variant: "flushed",
-                      }}
-                    />
-                  </Fade>
-                }
+              <div ref={inputRef} style={{ width: "100%" }}>
+                <form onSubmit={onSubmitForm} style={{ width: "100%" }}>
+                  {
+                    <Collapse in={focused} animateOpacity={true}>
+                      <MyInput
+                        control={control}
+                        name={"title"}
+                        renderStyleProps={{
+                          width: "full",
+                          height: "40px",
+                          fontSize: 20,
+                          placeholder: "Enter title",
+                          variant: "flushed",
+                          onFocus: () => setFocused(true),
+                        }}
+                      />
+                    </Collapse>
+                  }
 
-                <MyInput
-                  control={control}
-                  name={"text"}
-                  renderStyleProps={{
-                    width: "full",
-                    height: "80px",
-                    fontSize: 28,
-                    placeholder: "What needs to be done?",
-                    variant: "flushed",
-                    onFocus: () => setFocused(true),
-                    onBlur: () => {
-                      console.log("onblur");
-                    },
-                  }}
-                />
-              </form>
+                  <MyInput
+                    control={control}
+                    name={"text"}
+                    renderStyleProps={{
+                      width: "full",
+                      height: "80px",
+                      fontSize: 28,
+                      placeholder: "What needs to be done?",
+                      variant: "flushed",
+                      onFocus: () => setFocused(true),
+                    }}
+                  />
+                </form>
+              </div>
               {MOCK_DATA.map((item) => (
                 <Stack
                   borderColor={"lightgrey"}

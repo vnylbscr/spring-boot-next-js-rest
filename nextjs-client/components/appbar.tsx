@@ -1,8 +1,10 @@
 import { MoonIcon, SunIcon } from "@assets/icons";
 import {
   Box,
+  Button,
   Flex,
   IconButton,
+  Stack,
   Text,
   useColorMode,
   useColorModeValue,
@@ -35,15 +37,19 @@ const Appbar = () => {
       </Flex>
 
       <Box ml={"auto"}>
-        <IconButton
-          aria-label="Toggle theme"
-          colorScheme={useColorModeValue("purple", "yellow")}
-          icon={useColorModeValue(
-            <MoonIcon {...iconSettings} />,
-            <SunIcon {...iconSettings} />
-          )}
-          onClick={toggleColorMode}
-        />
+        <Stack direction={"row"}>
+          <IconButton
+            aria-label="Toggle theme"
+            colorScheme={useColorModeValue("purple", "yellow")}
+            icon={useColorModeValue(
+              <MoonIcon {...iconSettings} />,
+              <SunIcon {...iconSettings} />
+            )}
+            onClick={toggleColorMode}
+          />
+
+          <Button colorScheme={"messenger"}>Buy me a coffee.</Button>
+        </Stack>
       </Box>
     </Flex>
   );

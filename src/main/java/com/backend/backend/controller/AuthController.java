@@ -1,6 +1,7 @@
 package com.backend.backend.controller;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.backend.backend.exception.ResponseException;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,12 +48,13 @@ public class AuthController {
         }
 
         var loginResponse = authService.handleLogin(loginRequest);
-        Cookie cookie = new Cookie("token", loginResponse.getToken());
-        cookie.setMaxAge(60 * 60 * 24 * 30);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(false);
-        response.addCookie(cookie);
+        Cookie tokenCookie = new Cookie("token", loginResponse.getToken());
+        tokenCookie.setMaxAge(60 * 60 * 24 * 30);
+        tokenCookie.setPath("/");
+        tokenCookie.setHttpOnly(true);
+        tokenCookie.setSecure(false);
+
+        response.addCookie(tokenCookie);
         return ResponseHandler.generateResponse("success", HttpStatus.OK,
                 loginResponse);
     }
@@ -71,6 +74,21 @@ public class AuthController {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, "ok");
         } catch (ResponseException e) {
             logger.error("Error while registering: {}", e.getMessage());
+            return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
+        }
+    }
+
+    @GetMapping(value = "/verify")
+    public ResponseEntity<?> verify(HttpServletRequest request) {
+        try {
+            var token = request.getHeader("token");
+            if (token == null) {
+                throw new ResponseException("Invalid token", HttpStatus.UNAUTHORIZED);
+            }
+            var user = authService.verifyUser(token);
+            return ResponseHandler.generateResponse("success", HttpStatus.OK, user);
+        } catch (ResponseException e) {
+            logger.error("Error while verifying user: {}", e.getMessage());
             return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
         }
     }

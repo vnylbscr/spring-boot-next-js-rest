@@ -7,6 +7,7 @@ import com.backend.backend.util.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,6 +44,16 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody UserEntity paramUser) {
         try {
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.createUser(paramUser));
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, "Not found");
+        }
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteUser(@RequestBody String userId) {
+        try {
+            this.userService.deleteUser(userId);
+            return ResponseHandler.generateResponse("success", HttpStatus.OK, "User deleted");
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, "Not found");
         }

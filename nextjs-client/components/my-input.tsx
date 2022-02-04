@@ -36,8 +36,8 @@ const MyInput = <T extends FieldValues>(props: Props<T>) => {
                     : "password"
                   : "text"
               }
-              {...renderStyleProps}
               {...field}
+              {...renderStyleProps}
             />
             {renderStyleProps?.type === "password" && field.value && (
               <InputRightElement>
