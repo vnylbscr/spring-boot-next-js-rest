@@ -14,7 +14,9 @@ const login = async (data: LoginState) => {
     {
       ...data,
     },
-    { withCredentials: true }
+    {
+      withCredentials: true,
+    }
   );
 };
 
@@ -26,7 +28,9 @@ const register = async ({ email, username, password }: RegisterParams) => {
       username,
       password,
     },
-    { withCredentials: true }
+    {
+      withCredentials: true,
+    }
   );
 };
 

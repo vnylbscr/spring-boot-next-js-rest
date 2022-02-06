@@ -1,23 +1,20 @@
 import {
   Box,
-  Collapse,
   Container,
-  Fade,
   Flex,
   Heading,
   Stack,
   Text,
   useColorModeValue,
-  useOutsideClick,
 } from "@chakra-ui/react";
-import MyInput from "@components/my-input";
+import InputArea from "@components/inputArea";
 import AppLayout from "@layouts/appLayout";
-import customRequest from "@services/request";
+import { END_POINT } from "@lib/constants";
+import { useGetUserNotes } from "@services/user.service";
 import axios from "axios";
 import type { GetServerSidePropsContext } from "next";
-import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
-import { dehydrate, QueryClient } from "react-query";
+import { useQuery } from "react-query";
+import { User } from "types";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   if (!context.req.headers?.cookie?.includes("token")) {
@@ -29,8 +26,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  const data = axios
-    .get("/auth/verify", {
+  const res = await axios
+    .get(`${END_POINT}/auth/verify`, {
       headers: {
         token: context.req.headers.cookie.split("token=")[1].split(";")[0],
       },
@@ -39,7 +36,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   return {
     props: {
-      token: context.req.headers?.cookie?.split("token=")[1],
+      user: res.data,
+      token: context.req.headers.cookie.split("token=")[1].split(";")[0],
     },
   };
 }
@@ -71,25 +69,23 @@ const MOCK_DATA = [
   },
 ];
 
-const Home = (props: any) => {
-  const { control, handleSubmit } = useForm({
-    defaultValues: {
-      title: "",
-      text: "",
-    },
-  });
-  const [focused, setFocused] = useState(false);
+interface IProps {
+  user: User;
+  token: string;
+}
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useOutsideClick({
-    ref: inputRef,
-    handler: () => setFocused(false),
+const Home: React.FC<IProps> = ({ token, user, children }) => {
+  const { data } = useQuery("userPosts", () => {
+    return axios
+      .get(`${END_POINT}/note/user/${user.id}`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .then((res) => res.data);
   });
 
-  const onSubmitForm = handleSubmit(async (data) => {
-    console.log(data);
-  });
+  console.log("data user notes", data);
 
   return (
     <AppLayout title={"Home"}>
@@ -102,7 +98,7 @@ const Home = (props: any) => {
           direction={"column"}
           h={"full"}
         >
-          <Heading>Welcome, Mert</Heading>
+          <Heading>Welcome, {user.username} </Heading>
           <Container p={4} maxW={"4xl"}>
             <Flex
               overflowY={"auto"}
@@ -110,39 +106,11 @@ const Home = (props: any) => {
               justify={"center"}
               align="center"
             >
-              <div ref={inputRef} style={{ width: "100%" }}>
-                <form onSubmit={onSubmitForm} style={{ width: "100%" }}>
-                  {
-                    <Collapse in={focused} animateOpacity={true}>
-                      <MyInput
-                        control={control}
-                        name={"title"}
-                        renderStyleProps={{
-                          width: "full",
-                          height: "40px",
-                          fontSize: 20,
-                          placeholder: "Enter title",
-                          variant: "flushed",
-                          onFocus: () => setFocused(true),
-                        }}
-                      />
-                    </Collapse>
-                  }
-
-                  <MyInput
-                    control={control}
-                    name={"text"}
-                    renderStyleProps={{
-                      width: "full",
-                      height: "80px",
-                      fontSize: 28,
-                      placeholder: "What needs to be done?",
-                      variant: "flushed",
-                      onFocus: () => setFocused(true),
-                    }}
-                  />
-                </form>
-              </div>
+              <InputArea
+                onSubmit={(data) => {
+                  console.log("data is area", data);
+                }}
+              />
               {MOCK_DATA.map((item) => (
                 <Stack
                   borderColor={"lightgrey"}

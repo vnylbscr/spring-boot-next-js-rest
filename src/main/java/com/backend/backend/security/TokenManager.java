@@ -18,7 +18,7 @@ import io.jsonwebtoken.security.SignatureException;
 
 @Service
 public class TokenManager {
-    private final int validTime = 10 * 60 * 60 * 1000; // 10 minute
+    private final int validTime = 100 * 60 * 60 * 1000;
     Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     private static final Logger logger = LoggerFactory.getLogger(TokenManager.class);

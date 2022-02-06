@@ -60,6 +60,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register")
+    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         try {
             if (registerRequest.getPassword() == null
@@ -78,6 +79,7 @@ public class AuthController {
         }
     }
 
+    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     @GetMapping(value = "/verify")
     public ResponseEntity<?> verify(HttpServletRequest request) {
         try {
