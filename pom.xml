@@ -92,6 +92,9 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>
+			spring-boot-nest
+		</finalName>
 	</build>
 
 </project>

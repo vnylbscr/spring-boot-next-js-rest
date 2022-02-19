@@ -33,6 +33,7 @@ public class UserController {
         }
     }
 
+    // Merto
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserWithId(@PathVariable String id) {
         try {

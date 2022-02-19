@@ -32,18 +32,14 @@ public class UserServiceTest {
     }
 
     @Test
-    public void shouldGetUserSuccessfully() {
-        UserEntity user = new UserEntity("test", "test@test.com", "123123");
-        user.setId("1");
-        userService.getUser(user.getId());
-        Mockito.when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        assertEquals(user.getId(), "1");
-        assertEquals(user.getEmail(), "test@test.com");
-        assertEquals(user.getPassword(), "123123");
-    }
-
-    public void shouldGetAllUserSuccessfully() {
-
+    public void when_call_getUserWithEntity() {
+        // TODO
+        UserEntity userEntity = new UserEntity("merto", "test@test.com", "123123");
+        Mockito.when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
+        UserEntity result = userService.getUserWithEntity(userEntity.getId()).get();
+        assertEquals(userEntity.getId(), result.getId());
+        assertEquals(userEntity.getPassword(), result.getPassword());
+        assertEquals(userEntity.getUsername(), result.getUsername());
     }
 
 }
