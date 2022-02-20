@@ -13,10 +13,11 @@ import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
 
 interface Props<T> extends UseControllerProps<T> {
   renderStyleProps?: InputProps;
+  showWarningText?: boolean;
 }
 
 const MyInput = <T extends FieldValues>(props: Props<T>) => {
-  const { renderStyleProps, ...rest } = props;
+  const { renderStyleProps, showWarningText = true, ...rest } = props;
   const [show, setShow] = useState(false);
   const handleClick = useCallback(() => {
     setShow((prev) => !prev);
@@ -52,7 +53,7 @@ const MyInput = <T extends FieldValues>(props: Props<T>) => {
             )}
           </InputGroup>
 
-          {error && (
+          {error && showWarningText && (
             <Stack
               spacing={2}
               alignItems={"center"}

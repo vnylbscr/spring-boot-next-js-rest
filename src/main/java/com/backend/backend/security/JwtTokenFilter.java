@@ -31,8 +31,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println("request is" + request.getHeader("Authorization"));
+
         // Get headers from each request
-        final String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
         String email = null;
         String token = null;
@@ -41,6 +43,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             token = authHeader.split("\\s+")[1];
 
             logger.info("token is", token);
+            logger.info("burdayım tak diye");
 
             try {
                 email = tokenManager.getSubject(token);
@@ -49,33 +52,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             }
         }
 
-        // Handle refresh token requests separately
-
         if (email != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null &&
                 token != null) { // If token is valid
             logger.info("Authentication passed for user: {}", email);
-
             // Create a new authentication
             var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-            // Set the authentication in Spring Security's context
+            logger.info("credentiallllllls", authentication.getCredentials());
+            logger.info("principal", authentication.getPrincipal());
+            logger.info("auth is security context", SecurityContextHolder.getContext().getAuthentication());
+            // Set the authentication in the context
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-
-        if (email != null && token != null
-                && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (tokenManager.validateToken(token)) {
-
-                // Create a new authentication
-                var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // Set the authentication in Spring Security's context
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            }
         }
 
         filterChain.doFilter(request, response);

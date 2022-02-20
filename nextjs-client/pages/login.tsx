@@ -5,21 +5,21 @@ import {
   Heading,
   Link as ChakraLink,
   Stack,
-  useColorMode,
 } from "@chakra-ui/react";
 import MyInput from "@components/my-input";
 import LoginRegisterLayout from "@layouts/login-register-layout";
 import { REGEX } from "@lib/constants";
 import { useLoginMutation } from "@services/user.service";
+import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment } from "react";
 import { useForm } from "react-hook-form";
 import { LoginState } from "types";
 
 const LoginPage = () => {
-  const { error, mutateAsync, isLoading } = useLoginMutation();
+  const { mutateAsync, isLoading, error, data } = useTypeSafeMutation("login");
   const { control, handleSubmit, reset } = useForm<LoginState>({
     defaultValues: {
       email: "",
@@ -29,18 +29,12 @@ const LoginPage = () => {
   const router = useRouter();
 
   const onSubmitForm = handleSubmit(async (data) => {
-    mutateAsync(data)
-      .then(
-        ({
-          data: {
-            data: { user },
-          },
-        }) => {
-          localStorage.setItem("user", JSON.stringify(user));
-          const returnUrl = (router.query.returnUrl || "/") as string;
-          router.push(returnUrl);
-        }
-      )
+    mutateAsync([data])
+      .then(({ data: { user } }) => {
+        localStorage.setItem("user", JSON.stringify(user));
+        const returnUrl = (router.query.returnUrl || "/") as string;
+        router.push(returnUrl);
+      })
       .catch((err) => {
         console.log("error", err.message);
         reset({ email: "", password: "" });

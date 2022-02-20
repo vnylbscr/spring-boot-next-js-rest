@@ -44,7 +44,7 @@ public class NoteService {
         return convertNoteDtos(notes);
     }
 
-    public NoteEntity createNote(CreateNoteDto noteDto) throws ResponseException {
+    public GetNoteDto createNote(CreateNoteDto noteDto) throws ResponseException {
         UserEntity user = userService.getUserWithEntity(noteDto.getUserId()).get();
         if (user.getId() == null) {
             throw new ResponseException("User not exist.", HttpStatus.NOT_FOUND);
@@ -52,8 +52,11 @@ public class NoteService {
         NoteEntity note = new NoteEntity();
         note.setCreatedAt(new Date());
         note.setText(noteDto.getText());
+        note.setTitle(noteDto.getTitle());
         note.setUser(user);
-        return noteReposity.insert(note);
+
+        return convertNoteDto(
+                noteReposity.insert(note));
     }
 
     public Optional<Boolean> deleteNote(String noteId) {
@@ -69,12 +72,25 @@ public class NoteService {
         return null;
     }
 
+    public GetNoteDto completeNote(String noteId) {
+        var existNote = noteReposity.findById(noteId);
+        if (existNote.isPresent()) {
+            existNote.get().setCompleted(true);
+            return convertNoteDto(noteReposity.save(existNote.get()));
+        }
+        return null;
+    }
+
     private List<GetNoteDto> convertNoteDtos(List<NoteEntity> notes) {
         List<GetNoteDto> noteDtos = new ArrayList<>();
         notes.forEach(note -> {
             noteDtos.add(modelMapper.map(note, GetNoteDto.class));
         });
         return noteDtos;
+    }
+
+    private GetNoteDto convertNoteDto(NoteEntity note) {
+        return modelMapper.map(note, GetNoteDto.class);
     }
 
 }

@@ -1,19 +1,25 @@
 import {
   Box,
+  Button,
   Container,
   Flex,
   Heading,
-  Stack,
-  Text,
+  SkeletonCircle,
+  SkeletonText,
   useColorModeValue,
+  useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import InputArea from "@components/inputArea";
+import MyModal from "@components/modal";
+import NoteItem from "@components/noteItem";
 import AppLayout from "@layouts/appLayout";
 import { END_POINT } from "@lib/constants";
-import { useGetUserNotes } from "@services/user.service";
 import axios from "axios";
+import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
+import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import type { GetServerSidePropsContext } from "next";
-import { useQuery } from "react-query";
+import { Fragment } from "react";
 import { User } from "types";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
@@ -33,6 +39,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     })
     .then((res) => res.data);
+
+  console.log("res", res);
 
   return {
     props: {
@@ -75,17 +83,39 @@ interface IProps {
 }
 
 const Home: React.FC<IProps> = ({ token, user, children }) => {
-  const { data } = useQuery("userPosts", () => {
-    return axios
-      .get(`${END_POINT}/note/user/${user.id}`, {
-        headers: {
-          Authorization: token,
-        },
-      })
-      .then((res) => res.data);
+  const toast = useToast({
+    position: "bottom-right",
+    isClosable: true,
+    variant: "solid",
   });
 
-  console.log("data user notes", data);
+  const { isOpen, onToggle } = useDisclosure();
+
+  const {
+    data: userNotes,
+    isLoading: userNotesLoading,
+    error,
+  } = useTypeSafeQuery(
+    ["getUserNotes"],
+    {
+      refetchOnMount: "always",
+    },
+    user.id,
+    token
+  );
+
+  const {
+    mutateAsync,
+    isLoading,
+    error: addNoteError,
+  } = useTypeSafeMutation("addNote");
+
+  if (error) {
+    toast({
+      status: "error",
+      description: "An error occured",
+    });
+  }
 
   return (
     <AppLayout title={"Home"}>
@@ -108,32 +138,95 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
             >
               <InputArea
                 onSubmit={(data) => {
-                  console.log("data is area", data);
+                  mutateAsync([
+                    {
+                      ...data,
+                      userId: user.id,
+                    },
+                    token,
+                  ])
+                    .then(({ data }) => {
+                      toast({
+                        status: "success",
+                        description: `Note ${data?.title} successfull added.`,
+                      });
+                    })
+                    .catch((err) => {
+                      console.log("error is", err);
+                      toast({
+                        status: "error",
+                        description: `Note can't added.`,
+                      });
+                    });
                 }}
+                isLoading={isLoading}
               />
-              {MOCK_DATA.map((item) => (
-                <Stack
-                  borderColor={"lightgrey"}
-                  border={"1px"}
-                  p={4}
-                  direction={"column"}
-                  mt={4}
-                  borderRadius={4}
-                  w={"100%"}
-                  key={item.id}
-                  spacing={4}
-                >
-                  <Text
-                    fontWeight={"bold"}
-                    textDecoration={"underline"}
-                    fontSize={"xl"}
+              <Box w={"full"} h={"full"} mt={4}>
+                <Heading textAlign={"center"}>Latest Notes</Heading>
+                {userNotesLoading && (
+                  <Box
+                    padding="6"
+                    boxShadow="lg"
+                    bg="transparent"
+                    width={"full"}
                   >
-                    {item.name}
-                  </Text>
-                  <Text>{item.text}</Text>
-                  <Text> created at: {item.createdAt}</Text>
-                </Stack>
-              ))}
+                    {[1, 2, 3].map((item, index) => {
+                      return (
+                        <Box
+                          key={index}
+                          padding="6"
+                          boxShadow="lg"
+                          bg="transparent"
+                        >
+                          <SkeletonCircle size="10" />
+                          <SkeletonText mt="4" noOfLines={4} spacing="4" />
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+
+                {userNotes?.data?.map((item) => (
+                  <NoteItem
+                    onCompleted={(id) => {
+                      console.log("completed note id", id);
+                    }}
+                    onDeleted={(id) => {
+                      console.log("deleted note id", id);
+                      onToggle();
+                    }}
+                    key={item.id}
+                    note={item}
+                  />
+                ))}
+
+                <MyModal
+                  isOpen={isOpen}
+                  onClose={onToggle}
+                  body={
+                    <Box>
+                      <Heading fontSize={"xl"}>
+                        Are you sure you want to delete this note?
+                      </Heading>
+                    </Box>
+                  }
+                  footer={
+                    <Flex gap={5} direction={"row"}>
+                      <Button colorScheme={"red"} isFullWidth>
+                        Confirm
+                      </Button>
+                      <Button
+                        colorScheme={"gray"}
+                        isFullWidth
+                        onClick={onToggle}
+                      >
+                        Cancel
+                      </Button>
+                    </Flex>
+                  }
+                  title="Confirm delete"
+                />
+              </Box>
             </Flex>
           </Container>
         </Flex>

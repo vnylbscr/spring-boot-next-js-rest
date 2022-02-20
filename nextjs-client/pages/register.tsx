@@ -1,14 +1,13 @@
 import {
-  Button,
-  Heading,
-  Stack,
-  Link as ChakraLink,
-  Text,
   Alert,
   AlertIcon,
+  Button,
+  Heading,
+  Link as ChakraLink,
+  Stack,
 } from "@chakra-ui/react";
 import { REGEX } from "@lib/constants";
-import { useRegisterMutation } from "@services/user.service";
+import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
@@ -18,7 +17,7 @@ import LoginRegisterLayout from "../layouts/login-register-layout";
 import { RegisterState } from "../types";
 
 const RegisterPage = () => {
-  const { error, isLoading, mutateAsync, data } = useRegisterMutation();
+  const { mutateAsync, isLoading, error } = useTypeSafeMutation("register");
   const { control, handleSubmit, watch } = useForm<RegisterState>({
     defaultValues: {
       username: "",
@@ -31,8 +30,8 @@ const RegisterPage = () => {
   const router = useRouter();
 
   const onSubmitForm = handleSubmit((data) => {
-    mutateAsync(data)
-      .then(() => {
+    mutateAsync([data])
+      .then((res) => {
         setMessage("Submit successfull. You redirect to the login page.");
         setTimeout(() => {
           router.push({

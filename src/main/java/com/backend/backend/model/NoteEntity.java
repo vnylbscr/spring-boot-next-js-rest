@@ -16,7 +16,10 @@ public class NoteEntity {
 
     @Id
     private String id;
+
     private String text;
+
+    private String title;
 
     private Boolean completed = false;
 

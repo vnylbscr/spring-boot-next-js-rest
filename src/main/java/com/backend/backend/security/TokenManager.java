@@ -19,14 +19,17 @@ import io.jsonwebtoken.security.SignatureException;
 @Service
 public class TokenManager {
     private final int validTime = 100 * 60 * 60 * 1000;
-    Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    private String secret = "TUVSVE8gTEFMQSBTUFJJTkcgQVBQIFdJVEggTkVYVCBKUw==";
+    // create a secret key for signing the token
+    private Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
     private static final Logger logger = LoggerFactory.getLogger(TokenManager.class);
 
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
-                .signWith(key)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .setExpiration(new Date(System.currentTimeMillis() + validTime))
                 .compact();
     }
@@ -51,7 +54,8 @@ public class TokenManager {
     }
 
     public String getSubject(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody()
+                .getSubject();
     }
 
     public boolean isExpired(String token) {
@@ -62,5 +66,4 @@ public class TokenManager {
     private Claims getClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
-
 }

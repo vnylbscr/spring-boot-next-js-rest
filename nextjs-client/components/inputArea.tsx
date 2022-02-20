@@ -1,4 +1,11 @@
-import { Collapse, useOutsideClick } from "@chakra-ui/react";
+import {
+  Button,
+  Collapse,
+  InputGroup,
+  InputRightElement,
+  Spinner,
+  useOutsideClick,
+} from "@chakra-ui/react";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import MyInput from "./my-input";
@@ -10,10 +17,11 @@ interface IState {
 
 type Props = {
   onSubmit: (data: IState) => void;
+  isLoading?: boolean;
 };
 
-const InputArea: React.FC<Props> = ({ onSubmit }) => {
-  const { control, handleSubmit } = useForm<IState>({
+const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
+  const { control, handleSubmit, reset } = useForm<IState>({
     defaultValues: {
       title: "",
       text: "",
@@ -28,9 +36,16 @@ const InputArea: React.FC<Props> = ({ onSubmit }) => {
   });
 
   const onSubmitForm = handleSubmit(async (data) => {
-    console.log(data);
     onSubmit(data);
+    reset({
+      text: "",
+      title: "",
+    });
   });
+
+  if (isLoading) {
+    return <Spinner size={"lg"} />;
+  }
 
   return (
     <div ref={inputRef} style={{ width: "100%" }}>
@@ -48,6 +63,7 @@ const InputArea: React.FC<Props> = ({ onSubmit }) => {
                 variant: "flushed",
                 onFocus: () => setFocused(true),
               }}
+              showWarningText={false}
             />
           </Collapse>
         }
@@ -55,6 +71,12 @@ const InputArea: React.FC<Props> = ({ onSubmit }) => {
         <MyInput
           control={control}
           name={"text"}
+          rules={{
+            required: true,
+            validate: (value) => {
+              return !!value.trim();
+            },
+          }}
           renderStyleProps={{
             width: "full",
             height: "80px",
@@ -63,7 +85,12 @@ const InputArea: React.FC<Props> = ({ onSubmit }) => {
             variant: "flushed",
             onFocus: () => setFocused(true),
           }}
+          showWarningText={false}
         />
+
+        <Button my={4} type={"submit"} colorScheme="teal" isFullWidth>
+          Add
+        </Button>
       </form>
     </div>
   );

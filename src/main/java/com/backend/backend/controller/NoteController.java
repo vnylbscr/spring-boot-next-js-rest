@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,7 @@ public class NoteController {
     @Autowired
     private NoteService noteService;
 
+    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAllNotes() {
         try {
@@ -34,16 +36,17 @@ public class NoteController {
         }
     }
 
-    @GetMapping("/{noteId}")
-    public ResponseEntity<?> getSingleNote(@PathVariable String noteId) {
+    @CrossOrigin(origins = { "http://localhost:3007" })
+    @GetMapping()
+    public ResponseEntity<?> getSingleNote(@RequestParam String id) {
         try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(noteId));
+            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(id));
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
+    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserNotes(@PathVariable String userId) {
         try {
@@ -53,6 +56,7 @@ public class NoteController {
         }
     }
 
+    @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping()
     public ResponseEntity<?> createNote(@RequestBody CreateNoteDto noteDto) {
         try {
@@ -63,6 +67,28 @@ public class NoteController {
         }
     }
 
+    @CrossOrigin(origins = { "http://localhost:3007" })
+    @DeleteMapping()
+    public ResponseEntity<?> deleteNote(@RequestParam String id) {
+        try {
+            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
+                    this.noteService.deleteNote(id));
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @PostMapping("/complete")
+    public ResponseEntity<?> completeNote(@RequestParam String id) {
+        try {
+            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
+                    this.noteService.completeNote(id));
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/updateNote")
     public ResponseEntity<?> updateNote(@RequestParam NoteEntity note) {
         try {

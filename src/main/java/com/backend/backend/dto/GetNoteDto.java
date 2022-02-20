@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 public class GetNoteDto {
     private String id;
+    private String title;
     private String text;
     private Boolean completed;
     private GetUserDto user;
