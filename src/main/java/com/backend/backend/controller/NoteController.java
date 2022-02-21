@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 @RequestMapping("/note")
+@Slf4j
 public class NoteController {
 
     @Autowired
@@ -30,8 +33,10 @@ public class NoteController {
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAllNotes() {
         try {
+            log.info("getAllNotes");
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAll());
         } catch (Exception e) {
+            log.error("getAllNotes", e);
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
@@ -40,8 +45,10 @@ public class NoteController {
     @GetMapping()
     public ResponseEntity<?> getSingleNote(@RequestParam String id) {
         try {
+            log.info("getAllNotes");
             return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(id));
         } catch (Exception e) {
+            log.error("getAllNotes", e);
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
@@ -78,6 +85,7 @@ public class NoteController {
         }
     }
 
+    @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/complete")
     public ResponseEntity<?> completeNote(@RequestParam String id) {
         try {

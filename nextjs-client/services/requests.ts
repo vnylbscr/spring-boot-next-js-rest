@@ -91,6 +91,14 @@ const mutation = {
       .put(`/note?id=${noteId}`, data)
       .then((res) => res.data);
   },
+  completeNote: async (
+    noteId: string,
+    token: string
+  ): Promise<ResObject<Note>> => {
+    return await client(token)
+      .post(`/note/complete?id=${noteId}`)
+      .then((res) => res.data);
+  },
 };
 
 export const requests = {

@@ -1,10 +1,8 @@
-import { CheckIcon, DeleteIcon, SunIcon } from "@assets/icons";
+import { CheckIcon, DeleteIcon } from "@assets/icons";
 import {
-  Box,
   Button,
   Collapse,
   Flex,
-  IconButton,
   Stack,
   Text,
   useDisclosure,
@@ -48,14 +46,18 @@ const NoteItem: React.FC<Props> = ({ note, onCompleted, onDeleted }) => {
       onMouseLeave={onClose}
       position="relative"
       maxHeight={"100%"}
+      style={{
+        transition: "all .2s ease-in-out",
+      }}
     >
       <Flex justify={"space-between"}>
         <Text
           isTruncated={isOpen ? false : true}
           fontWeight={"bold"}
           fontSize={"lg"}
+          textDecoration={note.completed ? "line-through" : "none"}
         >
-          {note.title.toUpperCase()}
+          {note?.title || "Untitled"}
         </Text>
         <Text fontSize={"sm"} color="gray.500">
           {new Date(note.createdAt).toLocaleDateString("en-US", {
@@ -67,7 +69,11 @@ const NoteItem: React.FC<Props> = ({ note, onCompleted, onDeleted }) => {
         </Text>
       </Flex>
 
-      <Text noOfLines={isOpen ? undefined : 3} fontSize={"md"}>
+      <Text
+        textDecoration={note.completed ? "line-through" : "none"}
+        noOfLines={isOpen ? undefined : 3}
+        fontSize={"md"}
+      >
         {note.text}
       </Text>
 
@@ -78,17 +84,20 @@ const NoteItem: React.FC<Props> = ({ note, onCompleted, onDeleted }) => {
           justifyContent={"space-between"}
           mt="4"
         >
-          <Button
-            onClick={() => {
-              onCompleted(note.id);
-            }}
-            leftIcon={<CheckIcon {...iconSettings} />}
-            isFullWidth={true}
-            colorScheme={"teal"}
-            variant="outline"
-          >
-            Complete
-          </Button>
+          {!note.completed && (
+            <Button
+              onClick={() => {
+                onCompleted(note.id);
+              }}
+              leftIcon={<CheckIcon {...iconSettings} />}
+              isFullWidth={true}
+              colorScheme={"teal"}
+              variant="outline"
+            >
+              Complete
+            </Button>
+          )}
+
           <Button
             onClick={() => {
               onDeleted(note.id);
