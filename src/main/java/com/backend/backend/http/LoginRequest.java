@@ -1,7 +1,7 @@
 package com.backend.backend.http;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,9 +11,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class LoginRequest {
-    @NotNull(message = "Cannot be emptyyy")
-    @NotEmpty(message = "This field cannot be empty")
+    @Email(message = "Email is not valid")
+    @NotBlank(message = "Email is required")
     private String email;
-    @NotEmpty(message = "This field cannot be empty")
+    @NotBlank(message = "Password is required")
     private String password;
 }

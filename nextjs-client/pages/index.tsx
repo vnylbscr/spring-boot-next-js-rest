@@ -11,6 +11,7 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
+import EditNoteDrawer from "@components/editNoteDrawer";
 import InputArea from "@components/inputArea";
 import MyModal from "@components/modal";
 import NoteItem from "@components/noteItem";
@@ -21,9 +22,9 @@ import axios from "axios";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import type { GetServerSidePropsContext } from "next";
-import { Fragment, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { useQueryClient } from "react-query";
-import { User } from "types";
+import { Note, User } from "types";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
@@ -74,7 +75,9 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
     variant: "solid",
   });
   const [deletedNote, setDeletedNote] = useState<string>("");
+  const [editedNote, setEditedNote] = useState<Note | undefined>(undefined);
   const { isOpen: isOpenModal, onToggle: onToggleModal } = useDisclosure();
+  const { isOpen: isOpenDrawer, onToggle: onToggleDrawer } = useDisclosure();
   const queryClient = useQueryClient();
 
   const {
@@ -136,6 +139,25 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
     },
   });
 
+  const {
+    mutateAsync: updateNoteMutation,
+    isLoading: isLoadingUpdateNote,
+    error: updateNoteError,
+  } = useTypeSafeMutation("updateNote", {
+    onSuccess: ({ data: response }) => {
+      const cachedData: typeof userNotes =
+        queryClient.getQueryData("getUserNotes");
+
+      if (cachedData?.data) {
+        const newData = cachedData.data.map((note) =>
+          note.id === response.id ? response : note
+        );
+
+        queryClient.setQueryData("getUserNotes", { data: newData });
+      }
+    },
+  });
+
   const isError = Boolean(
     error || addNoteError || completeNoteError || deleteNoteError
   );
@@ -178,10 +200,7 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                     .then(({ data }) => {
                       toast({
                         status: "success",
-                        description: `Note ${data?.title.substring(
-                          0,
-                          20
-                        )} successfull added.`,
+                        description: `Note successfull added.`,
                       });
                     })
                     .catch((err) => {
@@ -195,7 +214,6 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                 isLoading={addNoteLoading}
               />
               <Box w={"full"} h={"full"} mt={4}>
-                <Heading textAlign={"center"}>Latest Notes</Heading>
                 {userNotesLoading ? (
                   <Box
                     padding="6"
@@ -211,7 +229,7 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                   <Fragment>
                     {userNotes?.data?.length === 0 ? (
                       <Flex
-                        justify={"flex-start"}
+                        justify={"center"}
                         direction="column"
                         align="center"
                         h={"600px"}
@@ -219,37 +237,56 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                       >
                         <NoteIcon fill={"#FFD32D"} width={50} height={50} />
                         <Text fontSize={"lg"}>
-                          You don't have any notes. Please add a new note by
-                          clicking the button above.
+                          You don't have any notes. You can add one by clicking
+                          on the add button.
                         </Text>
                       </Flex>
                     ) : (
-                      userNotes?.data?.map((item) => (
-                        <NoteItem
-                          onCompleted={(id) => {
-                            console.log("completed note id", id);
-                            completeNoteMutation([id, token])
-                              .then((res) => {
-                                console.log("completed note", res);
-                                toast({
-                                  status: "success",
-                                  description: `Note completed successfully.`,
+                      <Box minHeight={"60vh"}>
+                        {userNotes?.data?.map((item) => (
+                          <NoteItem
+                            key={item.id}
+                            onCompleted={(id) => {
+                              console.log("completed note id", id);
+                              completeNoteMutation([id, token])
+                                .then((res) => {
+                                  console.log("completed note", res);
+                                  toast({
+                                    status: "success",
+                                    description: `Note completed successfully.`,
+                                  });
+                                })
+                                .catch((err) => {
+                                  console.log("error is", err);
                                 });
-                              })
-                              .catch((err) => {
-                                console.log("error is", err);
-                              });
-                          }}
-                          onDeleted={(id) => {
-                            setDeletedNote(id);
-                            onToggleModal();
-                          }}
-                          key={item.id}
-                          note={item}
-                        />
-                      ))
+                            }}
+                            onDeleted={(id) => {
+                              setDeletedNote(id);
+                              onToggleModal();
+                            }}
+                            note={item}
+                            onEdited={(id) => {
+                              setEditedNote(
+                                userNotes?.data?.find((note) => note.id === id)
+                              );
+                              onToggleDrawer();
+                            }}
+                          />
+                        ))}
+                      </Box>
                     )}
                   </Fragment>
+                )}
+
+                {isOpenDrawer && (
+                  <EditNoteDrawer
+                    isOpen={isOpenDrawer}
+                    onClose={onToggleDrawer}
+                    onSubmit={(data) => {
+                      updateNoteMutation([])
+                    }}
+                    note={editedNote}
+                  />
                 )}
 
                 <MyModal

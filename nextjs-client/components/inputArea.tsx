@@ -62,6 +62,7 @@ const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
                 placeholder: "Enter title",
                 variant: "flushed",
                 onFocus: () => setFocused(true),
+                maxLength: 40,
               }}
               showWarningText={false}
             />

@@ -1,12 +1,17 @@
 package com.backend.backend.controller;
 
-import com.backend.backend.model.UserEntity;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotBlank;
+
+import com.backend.backend.dto.CreateUserDto;
 import com.backend.backend.service.UserService;
 import com.backend.backend.util.ResponseHandler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,9 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController()
 @RequestMapping("/users")
-@CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
+@Slf4j
+@Validated
 public class UserController {
 
     @Autowired
@@ -35,21 +44,25 @@ public class UserController {
 
     // Merto
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserWithId(@PathVariable String id) {
+    public ResponseEntity<?> getUserWithId(
+            @PathVariable("id") String id) {
         try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getUserWithDto(id));
+            var resp = this.userService.getUserWithDto(id);
+            if (resp.getId() == null) {
+                return ResponseHandler.generateResponse("User not found", HttpStatus.NOT_FOUND, null);
+            }
+            return ResponseHandler.generateResponse("success", HttpStatus.OK, resp);
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody UserEntity paramUser) {
-        try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.createUser(paramUser));
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, "Not found");
-        }
+    public ResponseEntity<?> createUser(
+            @Valid @RequestBody CreateUserDto createUserDto) {
+        log.error("createUser", createUserDto);
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, null);
+
     }
 
     @DeleteMapping

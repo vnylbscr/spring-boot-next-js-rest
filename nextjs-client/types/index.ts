@@ -42,6 +42,7 @@ export type ResObject<T> = {
   data: T;
   status: number;
   message: string;
+  errors: string[];
 };
 
 export interface LoginResponse {

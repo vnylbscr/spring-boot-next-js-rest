@@ -46,15 +46,17 @@ const query = {
 
 const mutation = {
   login: async (data: LoginState): Promise<ResObject<LoginResponse>> => {
-    return await client().post(`/auth/login`, data);
+    return await axios.post(`${END_POINT}/auth/login`, data, {
+      withCredentials: true,
+    });
   },
   register: async ({
     email,
     username,
     password,
   }: RegisterParams): Promise<ResObject<String>> => {
-    return await client()
-      .post(`/auth/register`, {
+    return await axios
+      .post(`${END_POINT}/auth/register`, {
         email,
         username,
         password,
