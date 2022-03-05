@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,7 +58,14 @@ public class AuthController {
         tokenCookie.setHttpOnly(true);
         tokenCookie.setSecure(false);
 
+        Cookie loggedCookie = new Cookie("isLoggedIn", "true");
+        loggedCookie.setMaxAge(60 * 60 * 24 * 30);
+        loggedCookie.setPath("/");
+        loggedCookie.setHttpOnly(true);
+        loggedCookie.setSecure(false);
+
         response.addCookie(tokenCookie);
+        response.addCookie(loggedCookie);
         return ResponseHandler.generateResponse("success", HttpStatus.OK,
                 loginResponse);
     }
@@ -84,16 +92,27 @@ public class AuthController {
 
     @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     @GetMapping(value = "/verify")
-    public ResponseEntity<?> verify(HttpServletRequest request) {
+    public ResponseEntity<?> verify(@CookieValue(name = "token", defaultValue = "") String cookieToken,
+            HttpServletRequest request, HttpServletResponse response) {
+        Cookie cookieLoggedIn;
         try {
+            logger.debug("Verifying token: {}", cookieToken);
             var token = request.getHeader("token");
             if (token == null) {
-                throw new ResponseException("Invalid token", HttpStatus.UNAUTHORIZED);
+                ResponseHandler.generateResponse("Token not found", HttpStatus.UNAUTHORIZED, null);
             }
             var user = authService.verifyUser(token);
+            cookieLoggedIn = new Cookie("isLoggedIn", "true");
+            cookieLoggedIn.setMaxAge(60 * 60 * 24 * 30);
+            cookieLoggedIn.setPath("/");
+            cookieLoggedIn.setHttpOnly(true);
+            cookieLoggedIn.setSecure(false);
+
+            response.addCookie(cookieLoggedIn);
             return ResponseHandler.generateResponse("success", HttpStatus.OK, user);
         } catch (ResponseException e) {
             logger.error("Error while verifying user: {}", e.getMessage());
+
             return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
         }
     }

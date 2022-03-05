@@ -1,18 +1,23 @@
 import {
   Button,
   Collapse,
+  Input,
   InputGroup,
   InputRightElement,
   Spinner,
+  Textarea,
   useOutsideClick,
 } from "@chakra-ui/react";
-import React, { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { COLORS } from "@lib/constants";
+import React, { useEffect, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import ColorPickerInput from "./colorPicker";
 import MyInput from "./my-input";
 
 interface IState {
   text: string;
   title: string;
+  color: string;
 }
 
 type Props = {
@@ -21,10 +26,11 @@ type Props = {
 };
 
 const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
-  const { control, handleSubmit, reset } = useForm<IState>({
+  const { control, handleSubmit, reset, setValue, watch } = useForm<IState>({
     defaultValues: {
       title: "",
       text: "",
+      color: "#A0AEC0",
     },
   });
   const [focused, setFocused] = useState(false);
@@ -40,8 +46,22 @@ const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
     reset({
       text: "",
       title: "",
+      color: COLORS.BLUE,
     });
   });
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        onSubmitForm();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onSubmitForm]);
 
   if (isLoading) {
     return <Spinner size={"lg"} />;
@@ -69,7 +89,7 @@ const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
           </Collapse>
         }
 
-        <MyInput
+        <Controller
           control={control}
           name={"text"}
           rules={{
@@ -78,15 +98,31 @@ const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
               return !!value.trim();
             },
           }}
-          renderStyleProps={{
-            width: "full",
-            height: "80px",
-            fontSize: 28,
-            placeholder: "What needs to be done?",
-            variant: "flushed",
-            onFocus: () => setFocused(true),
+          render={({ field }) => {
+            return (
+              <InputGroup mt={2}>
+                <Textarea
+                  width={"full"}
+                  fontSize={28}
+                  size="md"
+                  placeholder="What needs to be done?"
+                  variant="flushed"
+                  onFocus={() => setFocused(true)}
+                  resize="none"
+                  maxW={"90%"}
+                  {...field}
+                />
+                <InputRightElement h="full" mr={"4"}>
+                  <ColorPickerInput
+                    color={watch("color")}
+                    onSelect={(color) => {
+                      setValue("color", color, { shouldValidate: true });
+                    }}
+                  ></ColorPickerInput>
+                </InputRightElement>
+              </InputGroup>
+            );
           }}
-          showWarningText={false}
         />
 
         <Button my={4} type={"submit"} colorScheme="teal" isFullWidth>

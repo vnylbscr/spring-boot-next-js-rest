@@ -16,7 +16,7 @@ const client = (token?: string) =>
     withCredentials: true,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+      Authorization: token ? `Bearer ${token}` : "",
     },
   });
 

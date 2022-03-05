@@ -8,8 +8,9 @@ import {
 } from "@chakra-ui/react";
 import MyInput from "@components/my-input";
 import LoginRegisterLayout from "@layouts/login-register-layout";
-import { REGEX } from "@lib/constants";
-import { useLoginMutation } from "@services/user.service";
+import { END_POINT, REGEX } from "@lib/constants";
+import axios from "axios";
+import cookie from "cookie";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { GetServerSidePropsContext } from "next";
 import Link from "next/link";
@@ -20,13 +21,13 @@ import { LoginState } from "types";
 
 const LoginPage = () => {
   const { mutateAsync, isLoading, error, data } = useTypeSafeMutation("login");
+  const router = useRouter();
   const { control, handleSubmit, reset } = useForm<LoginState>({
     defaultValues: {
       email: "",
       password: "",
     },
   });
-  const router = useRouter();
 
   const onSubmitForm = handleSubmit(async (data) => {
     mutateAsync([data])
@@ -105,18 +106,46 @@ const LoginPage = () => {
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  if (context.req.headers?.cookie?.includes("token")) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
+  try {
+    const cookies = cookie.parse(context.req.headers.cookie || "");
 
-  return {
-    props: {},
-  };
+    // server side auth
+    if (cookies.isLoggedIn === "true" && cookies.token) {
+      const res = await axios
+        .get(`${END_POINT}/auth/verify`, {
+          headers: {
+            token: cookies.token,
+          },
+        })
+        .then((res) => res.data);
+
+      return {
+        redirect: {
+          destination: "/",
+          permanent: false,
+        },
+      };
+    }
+    return {
+      props: {},
+    };
+  } catch (error: any) {
+    if (error.response.status === 401) {
+      context.res.setHeader("Set-Cookie", [
+        cookie.serialize("token", "", {
+          maxAge: -1,
+          path: "/",
+        }),
+        cookie.serialize("isLoggedIn", "", {
+          maxAge: -1,
+          path: "/",
+        }),
+      ]);
+      return {
+        props: {},
+      };
+    }
+  }
 }
 
 export default LoginPage;

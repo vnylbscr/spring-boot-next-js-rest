@@ -50,9 +50,11 @@ public class NoteService {
             throw new ResponseException("User not exist.", HttpStatus.NOT_FOUND);
         }
         NoteEntity note = new NoteEntity();
+        System.out.println("color is" + noteDto.getColor());
         note.setCreatedAt(new Date());
         note.setText(noteDto.getText());
         note.setTitle(noteDto.getTitle());
+        note.setColor(noteDto.getColor().toString());
         note.setUser(user);
 
         return convertNoteDto(

@@ -10,11 +10,12 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CreateNoteDto {
-    @NotBlank(message = "Title is required")
     private String title;
 
     @NotBlank(message = "Note content cannot be blank")
     private String text;
+
+    private String color;
 
     @NotBlank(message = "userId is required")
     private String userId;

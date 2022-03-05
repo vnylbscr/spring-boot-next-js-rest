@@ -1,4 +1,5 @@
 import {
+  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -6,7 +7,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spacer,
+  Text,
 } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import React from "react";
 
 type Props = {
@@ -22,7 +26,7 @@ const MyModal = ({ title, isOpen, onClose, body, footer }: Props) => {
     <Modal isCentered isOpen={isOpen} onClose={onClose}>
       <ModalOverlay backdropFilter="blur(10px)" />
       <ModalContent>
-        <ModalHeader>{title}</ModalHeader>
+        <Text as={ModalHeader}>{title}</Text>
         <ModalCloseButton />
         <ModalBody>{body}</ModalBody>
         <ModalFooter>{footer}</ModalFooter>

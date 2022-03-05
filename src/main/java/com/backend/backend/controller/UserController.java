@@ -1,8 +1,6 @@
 package com.backend.backend.controller;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.NotBlank;
 
 import com.backend.backend.dto.CreateUserDto;
 import com.backend.backend.service.UserService;
@@ -49,7 +47,7 @@ public class UserController {
         try {
             var resp = this.userService.getUserWithDto(id);
             if (resp.getId() == null) {
-                return ResponseHandler.generateResponse("User not found", HttpStatus.NOT_FOUND, null);
+                return ResponseHandler.generateResponse("User not found", HttpStatus.OK, null);
             }
             return ResponseHandler.generateResponse("success", HttpStatus.OK, resp);
         } catch (Exception e) {
@@ -62,7 +60,6 @@ public class UserController {
             @Valid @RequestBody CreateUserDto createUserDto) {
         log.error("createUser", createUserDto);
         return ResponseHandler.generateResponse("success", HttpStatus.OK, null);
-
     }
 
     @DeleteMapping

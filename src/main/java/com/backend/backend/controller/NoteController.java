@@ -72,7 +72,8 @@ public class NoteController {
     @PostMapping()
     public ResponseEntity<?> createNote(@Valid @RequestBody CreateNoteDto noteDto) {
         try {
-            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
+            log.info("createNote color", noteDto.getColor());
+            return ResponseHandler.generateResponse("success", HttpStatus.CREATED,
                     this.noteService.createNote(noteDto));
         } catch (ResponseException e) {
             log.error("createNote", e.getMessage());

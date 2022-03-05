@@ -26,6 +26,7 @@ export interface Note {
   id: string;
   title: string;
   text: string;
+  color: string;
   completed: boolean;
   createdAt: string;
   updatedAt: string;
@@ -36,6 +37,7 @@ export interface CreateNote {
   title: string;
   text: string;
   userId: string;
+  color?: string;
 }
 
 export type ResObject<T> = {

@@ -11,10 +11,12 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useCallback } from "react";
+import { COLORS } from "@lib/constants";
+import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
+import React, { useCallback, useState } from "react";
 import TimeAgo from "timeago-react";
 import { Note } from "types";
-
+import ColorPickerInput from "./colorPicker";
 type NoteFunc = (id: string) => void;
 
 type Props = {
@@ -30,7 +32,7 @@ const NoteItem: React.FC<Props> = ({
   onDeleted,
   onEdited,
 }) => {
-  const { isOpen, onClose, onOpen } = useDisclosure();
+  const { isOpen, onClose, onOpen, onToggle } = useDisclosure();
 
   const iconSettings = {
     width: 20,
@@ -50,97 +52,141 @@ const NoteItem: React.FC<Props> = ({
   }, [note.id, onCompleted]);
 
   return (
-    <Stack
-      borderColor={"#aaa"}
-      border={"1px"}
-      p={4}
-      direction={"column"}
-      my={4}
-      borderRadius={4}
-      w={"100%"}
-      onMouseEnter={onOpen}
-      onMouseLeave={onClose}
-      position="relative"
-      maxHeight={"100%"}
-      style={{
-        transition: "all .2s ease-in-out",
-      }}
-    >
-      <Flex align={"center"} gap={isOpen ? "10px" : undefined}>
-        <Flex align={"center"} width={"100%"} justify="space-between">
-          <Text
-            isTruncated={isOpen ? false : true}
-            fontWeight={"bold"}
-            fontSize={"lg"}
-            textDecoration={note.completed ? "line-through" : "none"}
-          >
-            {note?.title || "Untitled Note"}
-          </Text>
-          <Tooltip
-            placement={"top"}
-            label={new Date(note.createdAt).toLocaleDateString()}
-            openDelay={500}
-          >
-            <Text fontSize={"sm"} colorScheme="gray">
-              <TimeAgo datetime={note.createdAt} locale="en" />
-            </Text>
-          </Tooltip>
-        </Flex>
-        <Collapse in={isOpen}>
-          <Tooltip
-            openDelay={500}
-            placement={"top"}
-            colorScheme="cyan"
-            label={"Edit"}
-          >
-            <IconButton
-              icon={<EditIcon width={15} height={15} />}
-              aria-label="Edit"
-              size={"xs"}
-              colorScheme="teal"
-              onClick={handleOnEdit}
-            />
-          </Tooltip>
-        </Collapse>
-      </Flex>
-
-      <Text
-        textDecoration={note.completed ? "line-through" : "none"}
-        noOfLines={isOpen ? undefined : 3}
-        fontSize={"md"}
+    <AnimateSharedLayout>
+      <Stack
+        borderColor={"#aaa"}
+        border={"1px"}
+        p={4}
+        direction={"column"}
+        my={4}
+        borderRadius={4}
+        w={"100%"}
+        onClick={onToggle}
+        maxHeight={"100%"}
+        cursor="pointer"
+        _hover={{
+          boxShadow: `0px 0px 3px ${useColorModeValue("#000", "#fff")}`,
+        }}
+        bgColor={note.color}
+        color="#fff"
       >
-        {note.text}
-      </Text>
-
-      <Collapse in={isOpen} startingHeight={0}>
-        <Flex
-          gap={"12px"}
-          flexDirection={"row"}
-          justifyContent={"space-between"}
-          mt="4"
-        >
-          {!note.completed && (
-            <Button
-              onClick={handleOnComplete}
-              leftIcon={<CheckIcon {...iconSettings} />}
-              isFullWidth={true}
-              colorScheme={"teal"}
+        <Flex align={"center"} gap={isOpen ? "10px" : undefined}>
+          <Flex align={"center"} width={"100%"} justify="space-between">
+            <Text
+              isTruncated={isOpen ? false : true}
+              fontWeight={"bold"}
+              fontSize={"lg"}
+              textDecoration={note.completed ? "line-through" : "none"}
             >
-              Complete
-            </Button>
-          )}
-
-          <Button
-            onClick={handleOnDelete}
-            isFullWidth={true}
-            colorScheme={"red"}
-            leftIcon={<DeleteIcon {...iconSettings} />}
-          >
-            Delete
-          </Button>
+              {note?.title || "Untitled Note"}
+            </Text>
+            <Tooltip
+              placement={"top"}
+              label={new Date(note.createdAt).toLocaleDateString()}
+              openDelay={500}
+            >
+              <Text fontSize={"sm"} colorScheme="gray">
+                <TimeAgo datetime={note.createdAt} locale="en" />
+              </Text>
+            </Tooltip>
+          </Flex>
+          <AnimatePresence>
+            {isOpen && (
+              <motion.section
+                key="content"
+                initial="collapsed"
+                animate="open"
+                exit="collapsed"
+                variants={{
+                  open: {
+                    opacity: 1,
+                    marginLeft: "0px",
+                  },
+                  collapsed: {
+                    opacity: 0,
+                    marginLeft: "-10%",
+                  },
+                }}
+                transition={{ duration: 0.2, ease: [0.04, 0.62, 0.23, 0.98] }}
+              >
+                <Tooltip
+                  openDelay={500}
+                  placement={"top"}
+                  colorScheme="cyan"
+                  label={"Edit"}
+                >
+                  <IconButton
+                    icon={<EditIcon width={15} height={15} />}
+                    aria-label="Edit"
+                    size={"xs"}
+                    colorScheme="teal"
+                    onClick={handleOnEdit}
+                  />
+                </Tooltip>
+              </motion.section>
+            )}
+          </AnimatePresence>
         </Flex>
-      </Collapse>
-    </Stack>
+        <Text
+          textDecoration={note.completed ? "line-through" : "none"}
+          noOfLines={isOpen ? undefined : 3}
+          fontSize={"md"}
+        >
+          {note.text}
+        </Text>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.section
+              initial={{
+                opacity: 0,
+                height: 0,
+              }}
+              animate={{
+                opacity: 1,
+                transition: {
+                  duration: 0.2,
+                },
+                height: "auto",
+              }}
+              exit={{
+                opacity: 0,
+                height: 0,
+                transition: {
+                  duration: 0.2,
+                },
+              }}
+            >
+              <Flex
+                gap={"12px"}
+                flexDirection={"row"}
+                justifyContent={"space-between"}
+                mt="4"
+              >
+                {!note.completed && (
+                  <Button
+                    onClick={handleOnComplete}
+                    leftIcon={<CheckIcon {...iconSettings} />}
+                    isFullWidth={true}
+                    colorScheme={"teal"}
+                  >
+                    Complete
+                  </Button>
+                )}
+
+                <Button
+                  onClick={handleOnDelete}
+                  isFullWidth={true}
+                  colorScheme={"red"}
+                  leftIcon={<DeleteIcon {...iconSettings} />}
+                >
+                  Delete
+                </Button>
+              </Flex>
+            </motion.section>
+          )}
+        </AnimatePresence>
+      </Stack>
+    </AnimateSharedLayout>
   );
 };
 

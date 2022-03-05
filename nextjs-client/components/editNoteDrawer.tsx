@@ -86,9 +86,14 @@ const EditNoteDrawer: React.FC<Props> = ({
             </Stack>
           </DrawerBody>
           <DrawerFooter borderBottomWidth={"1px"}>
-            <Button type="submit" colorScheme={"teal"}>
-              Save
-            </Button>
+            <Stack spacing={2} direction="row">
+              <Button colorScheme={"red"} onClick={onClose}>
+                Cancel
+              </Button>
+              <Button type="submit" colorScheme={"teal"}>
+                Save
+              </Button>
+            </Stack>
           </DrawerFooter>
         </form>
       </DrawerContent>

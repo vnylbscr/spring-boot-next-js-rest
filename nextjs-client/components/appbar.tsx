@@ -9,6 +9,7 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
+import Link from "next/link";
 import React from "react";
 
 const iconSettings = {
@@ -48,7 +49,9 @@ const Appbar = () => {
             onClick={toggleColorMode}
           />
 
-          <Button colorScheme={"messenger"}>Buy me a coffee.</Button>
+          <Link href={"/shortcuts"} passHref>
+            <Button colorScheme={"teal"}>Shortcuts</Button>
+          </Link>
         </Stack>
       </Box>
     </Flex>

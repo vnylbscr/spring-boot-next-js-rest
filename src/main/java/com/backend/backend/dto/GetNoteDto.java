@@ -12,6 +12,7 @@ public class GetNoteDto {
     private String title;
     private String text;
     private Boolean completed;
+    private String color;
     private GetUserDto user;
     private Date createdAt;
 }

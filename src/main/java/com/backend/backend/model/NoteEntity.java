@@ -23,6 +23,8 @@ public class NoteEntity {
 
     private Boolean completed = false;
 
+    private String color;
+
     @DBRef
     private UserEntity user;
 

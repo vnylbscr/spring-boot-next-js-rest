@@ -31,8 +31,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        System.out.println("request is" + request.getHeader("Authorization"));
-
         // Get headers from each request
         String authHeader = request.getHeader("Authorization");
 
@@ -48,6 +46,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             try {
                 email = tokenManager.getSubject(token);
             } catch (Exception e) {
+                response.setHeader("Set-Cookie", "isLoggedIn=false");
                 throw e;
             }
         }
@@ -56,6 +55,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().getAuthentication() == null &&
                 token != null) { // If token is valid
             logger.info("Authentication passed for user: {}", email);
+
+            response.setHeader("Set-Cookie", "isLoggedIn=true");
             // Create a new authentication
             var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
