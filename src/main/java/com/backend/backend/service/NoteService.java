@@ -11,6 +11,7 @@ import com.backend.backend.exception.ResponseException;
 import com.backend.backend.model.NoteEntity;
 import com.backend.backend.model.UserEntity;
 import com.backend.backend.repository.NoteRepository;
+import com.backend.backend.util.WithPagination;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -39,8 +40,25 @@ public class NoteService {
         return modelMapper.map(note, GetNoteDto.class);
     }
 
-    public List<GetNoteDto> getAllByUserId(String userId) {
-        var notes = noteReposity.getAllByUserId(userId);
+    public WithPagination<GetNoteDto> getAllByUserId(String userId, Boolean completed, Boolean isDescending,
+            String sortBy, int page,
+            int size) {
+        var paginationResult = noteReposity.getAllByUserId(userId, completed, isDescending, sortBy, page, size);
+        var dtos = convertNoteDtos(paginationResult.getItems());
+        WithPagination<GetNoteDto> result = new WithPagination<GetNoteDto>();
+        result.setItems(dtos);
+        result.setPage(paginationResult.getPage());
+        result.setSize(paginationResult.getSize());
+        result.setTotalCount(paginationResult.getTotalCount());
+        result.setTotalPages(paginationResult.getTotalPages());
+        result.setHasNext(paginationResult.isHasNext());
+        result.setHasPrevious(paginationResult.isHasPrevious());
+        result.setCurrentPage(paginationResult.getCurrentPage());
+        return result;
+    }
+
+    public List<GetNoteDto> searchNote(String search, String userId) {
+        var notes = noteReposity.searchNote(search, userId);
         return convertNoteDtos(notes);
     }
 

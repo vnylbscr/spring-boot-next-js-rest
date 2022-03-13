@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { COLORS } from "@lib/constants";
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
+import useStore from "global-store/useStore";
 import React, { useCallback, useState } from "react";
 import TimeAgo from "timeago-react";
 import { Note } from "types";
@@ -24,6 +25,7 @@ type Props = {
   onDeleted: NoteFunc;
   onCompleted: NoteFunc;
   onEdited: NoteFunc;
+  isOpen: boolean;
 };
 
 const NoteItem: React.FC<Props> = ({
@@ -31,8 +33,9 @@ const NoteItem: React.FC<Props> = ({
   onCompleted,
   onDeleted,
   onEdited,
+  isOpen,
 }) => {
-  const { isOpen, onClose, onOpen, onToggle } = useDisclosure();
+  const { setSelectedNote } = useStore();
 
   const iconSettings = {
     width: 20,
@@ -61,7 +64,13 @@ const NoteItem: React.FC<Props> = ({
         my={4}
         borderRadius={4}
         w={"100%"}
-        onClick={onToggle}
+        onClick={() => {
+          if (isOpen) {
+            setSelectedNote(null);
+            return;
+          }
+          setSelectedNote(note);
+        }}
         maxHeight={"100%"}
         cursor="pointer"
         _hover={{
@@ -82,7 +91,7 @@ const NoteItem: React.FC<Props> = ({
             </Text>
             <Tooltip
               placement={"top"}
-              label={new Date(note.createdAt).toLocaleDateString()}
+              label={new Date(note.createdAt).toString()}
               openDelay={500}
             >
               <Text fontSize={"sm"} colorScheme="gray">
@@ -167,7 +176,7 @@ const NoteItem: React.FC<Props> = ({
                     onClick={handleOnComplete}
                     leftIcon={<CheckIcon {...iconSettings} />}
                     isFullWidth={true}
-                    colorScheme={"teal"}
+                    colorScheme={"telegram"}
                   >
                     Complete
                   </Button>

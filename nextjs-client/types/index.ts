@@ -47,6 +47,27 @@ export type ResObject<T> = {
   errors: string[];
 };
 
+export type WithPagination<T> = {
+  items: T[];
+  page: number;
+  size: number;
+  totalCount: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+  totalPages: number;
+  currentPage: number;
+};
+
+export type GetUserNotesParams = {
+  userId: string;
+  token: string;
+  completed?: boolean;
+  isDescending?: boolean;
+  sortBy?: string;
+  page?: number;
+  size?: number;
+};
+
 export interface LoginResponse {
   token: string;
   user: User;

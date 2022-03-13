@@ -27,11 +27,15 @@ import axios from "axios";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import type { GetServerSidePropsContext } from "next";
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "react-query";
 import { Note, User } from "types";
 import cookie from "cookie";
 import AnimationPageLayout from "@layouts/animation-layout";
+import WelcomeSection from "@components/welcomeSection";
+import { useRouter } from "next/router";
+import Link from "next/link";
+import useStore from "global-store/useStore";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
@@ -84,17 +88,29 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
     isClosable: true,
     variant: "solid",
   });
-  const [deletedNote, setDeletedNote] = useState<string>("");
-  const [editedNote, setEditedNote] = useState<Note | undefined>(undefined);
-  const { isOpen: isOpenModal, onToggle: onToggleModal } = useDisclosure();
-  const { isOpen: isOpenDrawer, onToggle: onToggleDrawer } = useDisclosure();
+  const store = useStore();
+
+  const bodyRef = useRef<HTMLDivElement | null>(null);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const {
     data: userNotes,
     isLoading: userNotesLoading,
     error,
-  } = useTypeSafeQuery(["getUserNotes"], {}, user.id, token);
+  } = useTypeSafeQuery(
+    ["getUserNotes"],
+    {
+      keepPreviousData: true,
+    },
+    {
+      userId: user.id,
+      token,
+      completed: false,
+      page: 0,
+      size: 10,
+    }
+  );
 
   const {
     mutateAsync: addNoteMutation,
@@ -107,7 +123,11 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
 
       if (cachedData?.data) {
         queryClient.setQueryData("getUserNotes", {
-          data: [response, ...cachedData.data],
+          ...cachedData,
+          data: {
+            ...cachedData.data,
+            items: [response, ...cachedData.data.items],
+          },
         });
       }
     },
@@ -122,11 +142,17 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
       const cachedData: typeof userNotes =
         queryClient.getQueryData("getUserNotes");
 
-      if (cachedData?.data) {
-        const newData = cachedData.data.filter(
-          (note) => note.id !== deletedNote
+      if (cachedData?.data?.items) {
+        const newData = cachedData.data.items.filter(
+          (note) => note.id !== store.deletedNote
         );
-        queryClient.setQueryData("getUserNotes", { data: newData });
+        queryClient.setQueryData("getUserNotes", {
+          ...cachedData,
+          data: {
+            ...cachedData.data,
+            items: newData,
+          },
+        });
       }
     },
   });
@@ -141,10 +167,16 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
         queryClient.getQueryData("getUserNotes");
 
       if (cachedData?.data) {
-        const newData = cachedData.data.map((note) =>
+        const newData = cachedData.data.items.map((note) =>
           note.id === response.id ? response : note
         );
-        queryClient.setQueryData("getUserNotes", { data: newData });
+        queryClient.setQueryData("getUserNotes", {
+          ...cachedData,
+          data: {
+            ...cachedData.data,
+            items: newData,
+          },
+        });
       }
     },
   });
@@ -159,18 +191,58 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
         queryClient.getQueryData("getUserNotes");
 
       if (cachedData?.data) {
-        const newData = cachedData.data.map((note) =>
+        const newData = cachedData.data.items.map((note) =>
           note.id === response.id ? response : note
         );
 
-        queryClient.setQueryData("getUserNotes", { data: newData });
+        queryClient.setQueryData("getUserNotes", {
+          ...cachedData,
+          data: {
+            ...cachedData.data,
+            items: newData,
+          },
+        });
       }
     },
   });
 
+  console.log("store iss", store);
+
+  // if we have search query
+  useEffect(() => {
+    if (router.query.search) {
+      console.log("search query", router.query.search);
+    }
+  }, [router.query.search]);
+
+  // useEffect(() => {
+  //   const onHashChangeStart = (url: string) => {
+  //     console.log(`Path changing to ${url}`);
+  //   };
+
+  //   router.events.on("hashChangeStart", onHashChangeStart);
+
+  //   return () => {
+  //     router.events.off("hashChangeStart", onHashChangeStart);
+  //   };
+  // }, [router.events]);
+
   const isError = Boolean(
     error || addNoteError || completeNoteError || deleteNoteError
   );
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    // set paging
+    if (scrollTop + clientHeight === scrollHeight) {
+      console.log("scrolled to bottom");
+    }
+
+    // set scroll position
+    if (bodyRef.current) {
+      bodyRef.current.scrollTop = scrollTop;
+    }
+  };
 
   if (isError) {
     toast({
@@ -179,12 +251,10 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
     });
   }
 
-  console.log("rendered home");
-
   return (
     <AppLayout title={"Home"}>
       <AnimationPageLayout>
-        <Box>
+        <Box onScroll={handleScroll} ref={bodyRef}>
           <Flex
             justify={"center"}
             align={"center"}
@@ -193,24 +263,8 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
             direction={"column"}
             h={"full"}
           >
-            <Heading>Welcome, {user.username} </Heading>
-            <Heading fontSize={"xl"}>
-              Today is{" "}
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}{" "}
-              {"\n"}
-              {new Date().toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-              })}
-            </Heading>
-
-            <Container p={4} maxW={"5xl"}>
+            <WelcomeSection username={user.username} />
+            <Container maxW={"6xl"}>
               <Flex
                 overflowY={"auto"}
                 direction={"column"}
@@ -242,22 +296,39 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                   }}
                   isLoading={addNoteLoading}
                 />
-                <Box w={"full"} h={"full"} mt={4} px="1">
+                <Box w={"full"} h={"full"} mt={1} px="1">
                   <Tabs
                     onChange={(index) => {
                       console.log("index is", index);
                     }}
-                    variant="line"
-                    colorScheme="blue"
+                    variant="solid-rounded"
+                    colorScheme="teal"
                     isFitted={true}
                     py="4"
+                    defaultIndex={0}
                   >
                     <TabList>
-                      <Tab fontSize={"xl"}>All</Tab>
-                      <Tab fontSize={"xl"}>Completed</Tab>
+                      <Tab
+                        onClick={() => {
+                          store.setActiveTab("active");
+                        }}
+                        tabIndex={0}
+                        fontSize={"xl"}
+                      >
+                        Todo
+                      </Tab>
+                      <Tab
+                        onClick={() => {
+                          store.setActiveTab("completed");
+                        }}
+                        tabIndex={1}
+                        fontSize={"xl"}
+                      >
+                        Completed
+                      </Tab>
                     </TabList>
                     <TabPanels>
-                      <TabPanel>
+                      <TabPanel id={"tab-panel-active"} p={"0"}>
                         {userNotesLoading ? (
                           <Box
                             padding="6"
@@ -271,7 +342,7 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                           </Box>
                         ) : (
                           <Fragment>
-                            {userNotes?.data?.length === 0 ? (
+                            {userNotes?.data?.items?.length === 0 ? (
                               <Flex
                                 justify={"center"}
                                 direction="column"
@@ -291,7 +362,7 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                               </Flex>
                             ) : (
                               <Box minHeight={"60vh"}>
-                                {userNotes?.data?.map((item) => (
+                                {userNotes?.data?.items?.map((item) => (
                                   <NoteItem
                                     key={item.id}
                                     onCompleted={(id) => {
@@ -313,18 +384,24 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                                         });
                                     }}
                                     onDeleted={(id) => {
-                                      setDeletedNote(id);
-                                      onToggleModal();
+                                      store.setDeletedNote(id);
+                                      store.setIsOpenModal(true);
                                     }}
                                     note={item}
                                     onEdited={(id) => {
-                                      setEditedNote(
-                                        userNotes.data.find(
-                                          (note) => note.id === id
-                                        )
-                                      );
-                                      onToggleDrawer();
+                                      const foundNote =
+                                        userNotes.data.items.find?.(
+                                          (item) => item.id === id
+                                        );
+                                      if (foundNote) {
+                                        store.setEditedNote(foundNote);
+                                      } else {
+                                        console.log("note not found");
+                                        store.setEditedNote(null);
+                                      }
+                                      store.setIsDrawerOpen(true);
                                     }}
+                                    isOpen={store.selectedNote?.id === item.id}
                                   />
                                 ))}
                               </Box>
@@ -332,21 +409,25 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                           </Fragment>
                         )}
                       </TabPanel>
+
+                      {/* COMPLETED */}
+                      <TabPanel tabIndex={1}>
+                        <Text>Merto lala completed tab index 1</Text>
+                      </TabPanel>
                     </TabPanels>
                   </Tabs>
 
-                  {isOpenDrawer && (
-                    <EditNoteDrawer
-                      isOpen={isOpenDrawer}
-                      onClose={onToggleDrawer}
-                      onSubmit={(data) => {}}
-                      note={editedNote}
-                    />
-                  )}
+                  <EditNoteDrawer
+                    onSubmit={(data) => {
+                      console.log("edit note drawer mutation", data);
+                    }}
+                  />
 
                   <MyModal
-                    isOpen={isOpenModal}
-                    onClose={onToggleModal}
+                    isOpen={store.isOpenModal}
+                    onClose={() => {
+                      store.setIsOpenModal(false);
+                    }}
                     body={
                       <Box>
                         <Heading fontSize={"xl"}>
@@ -358,20 +439,20 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                       <Flex gap={5} direction={"row"}>
                         <Button
                           onClick={() => {
-                            deleteNoteMutation([deletedNote, token])
+                            deleteNoteMutation([store.deletedNote, token])
                               .then((res) => {
                                 toast({
                                   status: "success",
                                   description: `Note deleted successfully.`,
                                 });
-                                onToggleModal();
+                                store.setIsOpenModal(false);
                               })
                               .catch((err) => {
                                 toast({
                                   status: "error",
                                   description: `Note can't deleted.`,
                                 });
-                                onToggleModal();
+                                store.setIsOpenModal(false);
                               });
                           }}
                           colorScheme={"red"}
@@ -382,7 +463,10 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                         <Button
                           colorScheme={"gray"}
                           isFullWidth
-                          onClick={onToggleModal}
+                          onClick={() => {
+                            store.setIsOpenModal(false);
+                            store.setIsDrawerOpen(false);
+                          }}
                         >
                           Cancel
                         </Button>

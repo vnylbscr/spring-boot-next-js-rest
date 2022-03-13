@@ -47,6 +47,20 @@ public class NoteController {
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
+    @PostMapping("/search")
+    public ResponseEntity<?> searchNote(@RequestParam(value = "query", required = false) String search,
+            @RequestParam(value = "user", required = false) String userId) {
+        try {
+            log.info("searchNote");
+            return ResponseHandler.generateResponse("success", HttpStatus.OK,
+                    this.noteService.searchNote(search, userId));
+        } catch (Exception e) {
+            log.error("getAllNotes", e);
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        }
+    }
+
+    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping()
     public ResponseEntity<?> getSingleNote(@RequestParam String id) {
         try {
@@ -60,16 +74,22 @@ public class NoteController {
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getUserNotes(@PathVariable String userId) {
+    public ResponseEntity<?> getUserNotes(@PathVariable String userId,
+            @RequestParam(required = false) Boolean isDescending,
+            @RequestParam(required = false) Boolean completed,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
         try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAllByUserId(userId));
+            return ResponseHandler.generateResponse("success", HttpStatus.OK,
+                    this.noteService.getAllByUserId(userId, completed, isDescending, sortBy, page, size));
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
         }
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
-    @PostMapping()
+    @PostMapping("/create")
     public ResponseEntity<?> createNote(@Valid @RequestBody CreateNoteDto noteDto) {
         try {
             log.info("createNote color", noteDto.getColor());

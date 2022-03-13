@@ -10,16 +10,15 @@ import {
   Flex,
   Stack,
 } from "@chakra-ui/react";
+import useStore from "global-store/useStore";
+import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Note } from "types";
 import MyInput from "./my-input";
 
 interface Props {
-  isOpen: boolean;
-  onClose: () => void;
   onSubmit: (data: IState) => void;
-  note?: Note;
 }
 
 interface IState {
@@ -28,35 +27,39 @@ interface IState {
   id: string;
 }
 
-const EditNoteDrawer: React.FC<Props> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  note,
-}) => {
+const EditNoteDrawer: React.FC<Props> = ({ onSubmit }) => {
+  const { selectedNote, setIsDrawerOpen, isDrawerOpen } = useStore();
   const { control, handleSubmit, watch } = useForm({
     defaultValues: {
-      title: note?.title ?? "",
-      text: note?.text ?? "",
+      title: selectedNote?.title ?? "",
+      text: selectedNote?.text ?? "",
     },
   });
+  const { mutateAsync } = useTypeSafeMutation("updateNote");
 
   const handleOnSubmit = handleSubmit((data) => {
     onSubmit({
       ...data,
-      id: note?.id ?? "",
+      id: selectedNote?.id ?? "",
     });
   });
 
-  console.log("note text", note?.text);
+  console.log("selectedNote text", selectedNote?.text);
 
   return (
-    <Drawer placement={"bottom"} onClose={onClose} isOpen={isOpen}>
+    <Drawer
+      placement={"right"}
+      onClose={() => {
+        setIsDrawerOpen(false);
+      }}
+      isOpen={isDrawerOpen}
+    >
       <DrawerOverlay />
       <DrawerContent>
+        <DrawerCloseButton />
         <form onSubmit={handleOnSubmit}>
           <DrawerHeader borderBottomWidth="1px">Edit Note</DrawerHeader>
-          <DrawerBody h={"full"}>
+          <DrawerBody h={"max-content"}>
             <Stack
               h={"full"}
               spacing="5"
@@ -87,7 +90,12 @@ const EditNoteDrawer: React.FC<Props> = ({
           </DrawerBody>
           <DrawerFooter borderBottomWidth={"1px"}>
             <Stack spacing={2} direction="row">
-              <Button colorScheme={"red"} onClick={onClose}>
+              <Button
+                colorScheme={"red"}
+                onClick={() => {
+                  setIsDrawerOpen(false);
+                }}
+              >
                 Cancel
               </Button>
               <Button type="submit" colorScheme={"teal"}>

@@ -2,11 +2,13 @@ import { END_POINT } from "@lib/constants";
 import axios from "axios";
 import {
   CreateNote,
+  GetUserNotesParams,
   LoginResponse,
   LoginState,
   Note,
   RegisterParams,
   ResObject,
+  WithPagination,
 } from "types";
 
 // create a function axios and return a promise and add token to headers
@@ -22,11 +24,21 @@ const client = (token?: string) =>
 
 const query = {
   getUserNotes: async (
-    userId: string,
-    token: string
-  ): Promise<ResObject<Note[]>> => {
+    params: GetUserNotesParams
+  ): Promise<ResObject<WithPagination<Note>>> => {
+    const {
+      userId,
+      completed = false,
+      sortBy = "createdAt",
+      page = 0,
+      size = 10,
+      isDescending = true,
+      token,
+    } = params;
     return await client(token)
-      .get(`/note/user/${userId}`)
+      .get(
+        `/note/user/${userId}?isDescending=${isDescending}&sortBy=${sortBy}&page=${page}&size=${size}&completed=${completed}`
+      )
       .then((res) => res.data);
   },
   getSingleNote: async (
@@ -73,7 +85,16 @@ const mutation = {
     token: string
   ): Promise<ResObject<Note>> => {
     return await client(token)
-      .post(`/note`, data)
+      .post(`/note/create`, data)
+      .then((res) => res.data);
+  },
+  searchNote: async (
+    data: string,
+    user: string,
+    token: string
+  ): Promise<ResObject<Note[]>> => {
+    return await client(token)
+      .get(`/note/search?query=${data}&user=${user}`)
       .then((res) => res.data);
   },
   deleteNote: async (

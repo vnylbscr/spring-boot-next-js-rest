@@ -1,7 +1,6 @@
 import {
   Button,
   Collapse,
-  Input,
   InputGroup,
   InputRightElement,
   Spinner,
@@ -9,6 +8,7 @@ import {
   useOutsideClick,
 } from "@chakra-ui/react";
 import { COLORS } from "@lib/constants";
+import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import ColorPickerInput from "./colorPicker";
@@ -109,23 +109,52 @@ const InputArea: React.FC<Props> = ({ onSubmit, isLoading }) => {
                   variant="flushed"
                   onFocus={() => setFocused(true)}
                   resize="none"
-                  maxW={"90%"}
+                  maxW={watch("text").trim().length > 0 ? "92%" : "100%"}
+                  style={{
+                    transition: "max-width 0.2s ease-in-out",
+                  }}
                   {...field}
                 />
-                <InputRightElement h="full" mr={"4"}>
-                  <ColorPickerInput
-                    color={watch("color")}
-                    onSelect={(color) => {
-                      setValue("color", color, { shouldValidate: true });
-                    }}
-                  ></ColorPickerInput>
-                </InputRightElement>
+                <AnimatePresence>
+                  {watch("text").trim().length > 0 && (
+                    <motion.section
+                      initial={{
+                        opacity: 0,
+                        y: -100,
+                        marginLeft: "auto",
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: -100,
+                      }}
+                    >
+                      <InputRightElement h="full" mr={"6"} mt="2">
+                        <ColorPickerInput
+                          color={watch("color")}
+                          onSelect={(color) => {
+                            setValue("color", color, { shouldValidate: true });
+                          }}
+                        ></ColorPickerInput>
+                      </InputRightElement>
+                    </motion.section>
+                  )}
+                </AnimatePresence>
               </InputGroup>
             );
           }}
         />
 
-        <Button my={4} type={"submit"} colorScheme="teal" isFullWidth>
+        <Button
+          fontSize={"xl"}
+          my={4}
+          type={"submit"}
+          colorScheme="teal"
+          isFullWidth
+        >
           Add
         </Button>
       </form>

@@ -19,7 +19,8 @@
     "react-dom": "17.0.2",
     "react-hook-form": "^7.25.1",
     "react-query": "^3.34.12",
-    "timeago-react": "^3.0.4"
+    "timeago-react": "^3.0.4",
+    "zustand": "^3.7.1"
   },
   "devDependencies": {
     "@types/cookie": "^0.4.1",
