@@ -1,5 +1,4 @@
 import {
-  Flex,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -7,10 +6,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spacer,
   Text,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
 import React from "react";
 
 type Props = {
