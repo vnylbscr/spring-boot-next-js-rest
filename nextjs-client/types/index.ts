@@ -74,3 +74,9 @@ export interface LoginResponse {
 }
 
 export type RegisterParams = Omit<RegisterState, "passwordConfirm">;
+
+export type GetSearchQueryParams = {
+  data: string;
+  user?: string;
+  token: string;
+};

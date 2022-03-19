@@ -47,7 +47,7 @@ public class NoteController {
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
-    @PostMapping("/search")
+    @GetMapping("/search")
     public ResponseEntity<?> searchNote(@RequestParam(value = "query", required = false) String search,
             @RequestParam(value = "user", required = false) String userId) {
         try {

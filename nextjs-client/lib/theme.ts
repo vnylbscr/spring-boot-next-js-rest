@@ -7,10 +7,10 @@ const config: ThemeConfig = {
 
 const theme = extendTheme({
   config,
-  fonts: {
-    heading: "Source Sans Pro, sans-serif",
-    body: "Source Sans Pro, sans-serif",
-  },
+  // fonts: {
+  //   heading: "Source Sans Pro, sans-serif",
+  //   body: "Source Sans Pro, sans-serif",
+  // },
 });
 
 export default theme;

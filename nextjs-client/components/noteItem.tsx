@@ -1,8 +1,6 @@
 import { CheckIcon, DeleteIcon, EditIcon } from "@assets/icons";
 import {
   Button,
-  Collapse,
-  Fade,
   Flex,
   IconButton,
   Stack,
@@ -11,21 +9,19 @@ import {
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { COLORS } from "@lib/constants";
 import { AnimatePresence, AnimateSharedLayout, motion } from "framer-motion";
 import useStore from "global-store/useStore";
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import TimeAgo from "timeago-react";
 import { Note } from "types";
-import ColorPickerInput from "./colorPicker";
 type NoteFunc = (id: string) => void;
 
 type Props = {
   note: Note;
-  onDeleted: NoteFunc;
-  onCompleted: NoteFunc;
-  onEdited: NoteFunc;
-  isOpen: boolean;
+  onDeleted?: NoteFunc;
+  onCompleted?: NoteFunc;
+  onEdited?: NoteFunc;
+  isOpen?: boolean;
 };
 
 const NoteItem: React.FC<Props> = ({
@@ -33,9 +29,9 @@ const NoteItem: React.FC<Props> = ({
   onCompleted,
   onDeleted,
   onEdited,
-  isOpen,
 }) => {
   const { setSelectedNote } = useStore();
+  const { isOpen, onToggle } = useDisclosure();
 
   const iconSettings = {
     width: 20,
@@ -43,15 +39,15 @@ const NoteItem: React.FC<Props> = ({
   };
 
   const handleOnDelete = useCallback(() => {
-    onDeleted(note.id);
+    onDeleted?.(note.id);
   }, [note.id, onDeleted]);
 
   const handleOnEdit = useCallback(() => {
-    onEdited(note.id);
+    onEdited?.(note.id);
   }, [note.id, onEdited]);
 
   const handleOnComplete = useCallback(() => {
-    onCompleted(note.id);
+    onCompleted?.(note.id);
   }, [note.id, onCompleted]);
 
   return (
@@ -65,11 +61,7 @@ const NoteItem: React.FC<Props> = ({
         borderRadius={4}
         w={"100%"}
         onClick={() => {
-          if (isOpen) {
-            setSelectedNote(null);
-            return;
-          }
-          setSelectedNote(note);
+          onToggle();
         }}
         maxHeight={"100%"}
         cursor="pointer"

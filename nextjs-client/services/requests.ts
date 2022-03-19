@@ -2,6 +2,7 @@ import { END_POINT } from "@lib/constants";
 import axios from "axios";
 import {
   CreateNote,
+  GetSearchQueryParams,
   GetUserNotesParams,
   LoginResponse,
   LoginState,
@@ -35,7 +36,7 @@ const query = {
       isDescending = true,
       token,
     } = params;
-    return await client(token)
+    return client(token)
       .get(
         `/note/user/${userId}?isDescending=${isDescending}&sortBy=${sortBy}&page=${page}&size=${size}&completed=${completed}`
       )
@@ -45,20 +46,27 @@ const query = {
     noteId: string,
     token: string
   ): Promise<ResObject<Note>> => {
-    return await client(token)
+    return client(token)
       .get(`/note?id=${noteId}`)
       .then((res) => res.data);
   },
   getAllNotes: async (token: string): Promise<ResObject<Note[]>> => {
-    return await client(token)
+    return client(token)
       .get(`/note/getAll`)
+      .then((res) => res.data);
+  },
+  searchNote: async (
+    variables: GetSearchQueryParams
+  ): Promise<ResObject<Note[]>> => {
+    return client(variables.token)
+      .get(`/note/search?query=${variables.data}&user=${variables.user}`)
       .then((res) => res.data);
   },
 };
 
 const mutation = {
   login: async (data: LoginState): Promise<ResObject<LoginResponse>> => {
-    return await axios.post(`${END_POINT}/auth/login`, data, {
+    return axios.post(`${END_POINT}/auth/login`, data, {
       withCredentials: true,
     });
   },
@@ -67,7 +75,7 @@ const mutation = {
     username,
     password,
   }: RegisterParams): Promise<ResObject<String>> => {
-    return await axios
+    return axios
       .post(`${END_POINT}/auth/register`, {
         email,
         username,
@@ -76,7 +84,7 @@ const mutation = {
       .then((res) => res.data);
   },
   logout: async (): Promise<ResObject<String>> => {
-    return await client()
+    return client()
       .post(`/auth/logout`)
       .then((res) => res.data);
   },
@@ -84,24 +92,16 @@ const mutation = {
     data: CreateNote,
     token: string
   ): Promise<ResObject<Note>> => {
-    return await client(token)
+    return client(token)
       .post(`/note/create`, data)
       .then((res) => res.data);
   },
-  searchNote: async (
-    data: string,
-    user: string,
-    token: string
-  ): Promise<ResObject<Note[]>> => {
-    return await client(token)
-      .get(`/note/search?query=${data}&user=${user}`)
-      .then((res) => res.data);
-  },
+
   deleteNote: async (
     noteId: string,
     token: string
   ): Promise<ResObject<String>> => {
-    return await client(token)
+    return client(token)
       .delete(`/note?id=${noteId}`)
       .then((res) => res.data);
   },
@@ -110,7 +110,7 @@ const mutation = {
     data: CreateNote,
     token: string
   ): Promise<ResObject<Note>> => {
-    return await client(token)
+    return client(token)
       .put(`/note?id=${noteId}`, data)
       .then((res) => res.data);
   },
@@ -118,7 +118,7 @@ const mutation = {
     noteId: string,
     token: string
   ): Promise<ResObject<Note>> => {
-    return await client(token)
+    return client(token)
       .post(`/note/complete?id=${noteId}`)
       .then((res) => res.data);
   },

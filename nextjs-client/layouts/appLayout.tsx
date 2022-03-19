@@ -4,15 +4,13 @@ import FooterText from "@components/footerText";
 import Head from "next/head";
 import React from "react";
 
-const AppLayout: React.FC<{ title: string }> = ({ children, title }) => {
+const AppLayout: React.FC<{ title?: string }> = ({ children, title }) => {
   return (
     <Box as="main" pb={1}>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="description" content="Mert Genç's Homepage" />
-        <meta name="author" content="Mert Genç" />
-        <meta name="author" content="Mert Genç" />
-        <meta name="author" content="Mert Genç Sakarya Istanbul Turkey" />
+        <meta name="description" content="Notestack. " />
+        <meta name="author" content="NoteStack" />
         <meta
           name="author"
           content="Mert Genç Developer Computer Engineer Programmer Full Stack Developer"

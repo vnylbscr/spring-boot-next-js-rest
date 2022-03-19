@@ -1,4 +1,4 @@
-import { Note } from "types";
+import { Note, User } from "types";
 import create from "zustand";
 import { combine } from "zustand/middleware";
 
@@ -14,6 +14,8 @@ const useStore = create(
       isOpenModal: false,
       deletedNote: null as unknown as string,
       editedNote: null as unknown as Note | null,
+      token: null as unknown as string,
+      user: null as unknown as User | null,
     },
     (set) => ({
       setSelectedNote: (note: Note | null) =>
@@ -43,6 +45,14 @@ const useStore = create(
       setEditedNote: (note: Note | null) =>
         set({
           editedNote: note,
+        }),
+      setToken: (token: string) =>
+        set({
+          token,
+        }),
+      setUser: (user: User | null) =>
+        set({
+          user,
         }),
     })
   )

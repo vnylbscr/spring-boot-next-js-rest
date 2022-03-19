@@ -1,17 +1,20 @@
-import { MoonIcon, SunIcon } from "@assets/icons";
+import { MoonIcon, SearchIcon, SunIcon } from "@assets/icons";
 import {
   Box,
   Button,
   Flex,
   IconButton,
   Input,
+  InputGroup,
+  InputRightElement,
   Stack,
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
+import { AnimatePresence, motion } from "framer-motion";
 import useSearchStore from "global-store/useSearchStore";
-import useDebounce from "hooks/useDebounce";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
 
 const iconSettings = {
@@ -23,8 +26,9 @@ const Appbar: React.FC = ({}) => {
   const { toggleColorMode } = useColorMode();
   const { setSearchValue, addSearchHistory, searchHistory, searchValue } =
     useSearchStore();
-  const debouncedValue = useDebounce(searchValue.trim(), 1000);
+  // const debouncedValue = useDebounce(searchValue.trim(), 1000);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const cmdK = (e: KeyboardEvent) => {
@@ -33,6 +37,15 @@ const Appbar: React.FC = ({}) => {
       }
       if (e.key === "Escape") {
         inputRef.current?.blur();
+      }
+      if (e.metaKey && e.key === "Backspace" && searchValue.length === 0) {
+        router.back();
+      }
+      if (e.metaKey && e.key === ",") {
+        router.push("/shortcuts");
+      }
+      if (e.metaKey && e.key === "b") {
+        toggleColorMode();
       }
     };
 
@@ -46,20 +59,6 @@ const Appbar: React.FC = ({}) => {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
-
-  console.log("searchValue", debouncedValue);
-  console.log("search history", searchHistory);
-  console.log("search value", searchValue);
-
-  useEffect(() => {
-    if (debouncedValue.trim().length > 0) {
-      addSearchHistory(debouncedValue);
-    }
-    if (debouncedValue.trim().length === 0) {
-      setSearchValue("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedValue]);
 
   return (
     <Flex
@@ -89,13 +88,64 @@ const Appbar: React.FC = ({}) => {
       </Flex>
 
       <Flex width={"4xl"}>
-        <Input
-          placeholder="Search your notes"
-          onChange={handleSearch}
-          variant="filled"
-          size="lg"
-          ref={inputRef}
-        />
+        <InputGroup size={"md"}>
+          <Input
+            placeholder="Search your notes ⌘ + K"
+            onChange={handleSearch}
+            variant="filled"
+            size="lg"
+            ref={inputRef}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && searchValue.trim().length > 0) {
+                addSearchHistory(searchValue);
+                router.push({
+                  pathname: "/search",
+                  query: { q: searchValue.trim() },
+                });
+                setSearchValue("");
+              }
+            }}
+          />
+
+          <AnimatePresence>
+            {searchValue.trim().length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <InputRightElement
+                  display={"flex"}
+                  justifyContent="center"
+                  alignItems={"center"}
+                  width="10rem"
+                >
+                  <Button
+                    colorScheme={"gray"}
+                    variant="solid"
+                    h="2rem"
+                    w="8rem"
+                    size="md"
+                    mt={2}
+                    mr="4"
+                    px="2"
+                    leftIcon={<SearchIcon width={25} height={25} />}
+                    onClick={() => {
+                      router.push({
+                        pathname: "/search",
+                        query: { q: searchValue.trim() },
+                      });
+                      addSearchHistory(searchValue);
+                      setSearchValue("");
+                    }}
+                  >
+                    Search
+                  </Button>
+                </InputRightElement>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </InputGroup>
       </Flex>
 
       <Box>

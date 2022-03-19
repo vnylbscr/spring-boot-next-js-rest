@@ -86,11 +86,12 @@ public class CustomNoteRepositoryImpl implements CustomNoteRepository {
     @Override
     public List<NoteEntity> searchNote(String search, String userId) {
         Query query = new Query();
-        query.addCriteria(Criteria.where("userId").is(userId));
-        query.addCriteria(Criteria.where("title")
-                .regex(Pattern.compile(search, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)));
-        query.addCriteria(Criteria.where("text").regex(
-                Pattern.compile(search, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)));
+        // search multiple fields
+        Pattern pattern = Pattern.compile(".*" + search + ".*", Pattern.CASE_INSENSITIVE);
+        // query.addCriteria(Criteria.where("user").is(userId));
+        query.addCriteria(Criteria.where("title").regex(pattern));
+        query.addCriteria(Criteria.where("text").regex(pattern));
+
         return mongoTemplate.find(query, NoteEntity.class);
     }
 

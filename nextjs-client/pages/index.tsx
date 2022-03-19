@@ -13,7 +13,6 @@ import {
   Tabs,
   Text,
   useColorModeValue,
-  useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import EditNoteDrawer from "@components/editNoteDrawer";
@@ -21,21 +20,19 @@ import InputArea from "@components/inputArea";
 import MyModal from "@components/modal";
 import NoteItem from "@components/noteItem";
 import SkeletonNote from "@components/skeleton";
+import WelcomeSection from "@components/welcomeSection";
+import AnimationPageLayout from "@layouts/animation-layout";
 import AppLayout from "@layouts/appLayout";
 import { END_POINT } from "@lib/constants";
 import axios from "axios";
+import cookie from "cookie";
+import useStore from "global-store/useStore";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import type { GetServerSidePropsContext } from "next";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
-import { Note, User } from "types";
-import cookie from "cookie";
-import AnimationPageLayout from "@layouts/animation-layout";
-import WelcomeSection from "@components/welcomeSection";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import useStore from "global-store/useStore";
+import { User } from "types";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
@@ -82,7 +79,7 @@ interface IProps {
   token: string;
 }
 
-const Home: React.FC<IProps> = ({ token, user, children }) => {
+const Home: React.FC<IProps> = ({ token, user }) => {
   const toast = useToast({
     position: "bottom-right",
     isClosable: true,
@@ -92,7 +89,12 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
 
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const queryClient = useQueryClient();
-  const router = useRouter();
+
+  useEffect(() => {
+    store.setToken(token);
+    store.setUser(user);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   const {
     data: userNotes,
@@ -205,27 +207,6 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
       }
     },
   });
-
-  console.log("store iss", store);
-
-  // if we have search query
-  useEffect(() => {
-    if (router.query.search) {
-      console.log("search query", router.query.search);
-    }
-  }, [router.query.search]);
-
-  // useEffect(() => {
-  //   const onHashChangeStart = (url: string) => {
-  //     console.log(`Path changing to ${url}`);
-  //   };
-
-  //   router.events.on("hashChangeStart", onHashChangeStart);
-
-  //   return () => {
-  //     router.events.off("hashChangeStart", onHashChangeStart);
-  //   };
-  // }, [router.events]);
 
   const isError = Boolean(
     error || addNoteError || completeNoteError || deleteNoteError
@@ -372,7 +353,7 @@ const Home: React.FC<IProps> = ({ token, user, children }) => {
                                           console.log("completed note", res);
                                           toast({
                                             status: "success",
-                                            description: `Good work 💪 Note completed successfully.`,
+                                            description: `Good job 💪 Note completed successfully.`,
                                           });
                                         })
                                         .catch((err) => {
