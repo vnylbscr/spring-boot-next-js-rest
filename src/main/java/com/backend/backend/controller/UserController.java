@@ -33,26 +33,18 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<?> getAll() {
-        try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getAll());
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, null);
-        }
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, this.userService.getAll());
     }
 
-    // Merto
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserWithId(
             @PathVariable("id") String id) {
-        try {
-            var resp = this.userService.getUserWithDto(id);
-            if (resp.getId() == null) {
-                return ResponseHandler.generateResponse("User not found", HttpStatus.OK, null);
-            }
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, resp);
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
+        var resp = this.userService.getUserWithDto(id);
+        if (resp.getId() == null) {
+            return ResponseHandler.generateResponse("User not found", HttpStatus.OK, null);
         }
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, resp);
+
     }
 
     @PostMapping
@@ -64,12 +56,8 @@ public class UserController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteUser(@RequestBody String userId) {
-        try {
-            this.userService.deleteUser(userId);
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, "User deleted");
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.NOT_FOUND, "Not found");
-        }
+        this.userService.deleteUser(userId);
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, "User deleted");
     }
 
 }
