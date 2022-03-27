@@ -54,6 +54,7 @@ const Appbar: React.FC = ({}) => {
     return () => {
       document.removeEventListener("keydown", cmdK);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,5 +1,14 @@
 /* eslint-disable react/no-unescaped-entities */
-import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Heading,
+  Stack,
+  Text,
+  useToast,
+} from "@chakra-ui/react";
+import MyModal from "@components/modal";
 import NoteItem from "@components/noteItem";
 import SkeletonNote from "@components/skeleton";
 import AnimationPageLayout from "@layouts/animation-layout";
@@ -7,6 +16,8 @@ import AppLayout from "@layouts/appLayout";
 import { END_POINT } from "@lib/constants";
 import axios from "axios";
 import cookie from "cookie";
+import useStore from "global-store/useStore";
+import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
@@ -21,6 +32,13 @@ type Props = {
 const SearchPage: React.FC<Props> = ({ user, token }) => {
   const router = useRouter();
   const searchValue = router.query.q as string;
+  const store = useStore();
+
+  const toast = useToast({
+    position: "bottom-right",
+    isClosable: true,
+    variant: "solid",
+  });
 
   const { data, error, isLoading, refetch, isRefetching } = useTypeSafeQuery(
     "searchNote",
@@ -34,14 +52,24 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
     }
   );
 
+  const {
+    mutateAsync: deleteNoteMutation,
+    isLoading: deleteNoteMutationLoading,
+    isError: deleteMutationisError,
+  } = useTypeSafeMutation("deleteNote");
+
+  const {
+    mutateAsync: updateNoteMutation,
+    isLoading: updateNoteMutationLoading,
+    isError: updateMutationisError,
+  } = useTypeSafeMutation("updateNote");
+
   useEffect(() => {
     if (!router.isReady) return;
     if (searchValue) {
       refetch();
     }
   }, [refetch, router.isReady, searchValue]);
-
-  console.log("is loading", isLoading);
 
   if (isLoading || isRefetching) {
     return (
@@ -73,11 +101,70 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
               </Text>
               {data?.data.map((note) => (
                 <Flex direction={"column"} w="full" key={note.id}>
-                  <NoteItem note={note} />
+                  <NoteItem
+                    onDeleted={(id) => {
+                      store.setDeletedNote(id);
+                      store.setIsOpenModal(true);
+                    }}
+                    note={note}
+                  />
                 </Flex>
               ))}
             </Flex>
           )}
+
+          {/* Modal */}
+          <MyModal
+            isOpen={store.isOpenModal}
+            onClose={() => {
+              store.setIsOpenModal(false);
+            }}
+            body={
+              <Box>
+                <Heading fontSize={"xl"}>
+                  Are you sure you want to delete this note?
+                </Heading>
+              </Box>
+            }
+            footer={
+              <Flex gap={5} direction={"row"}>
+                <Button
+                  onClick={() => {
+                    deleteNoteMutation([store.deletedNote, token])
+                      .then((res) => {
+                        toast({
+                          status: "success",
+                          description: `Note deleted successfully.`,
+                        });
+                        store.setIsOpenModal(false);
+                      })
+                      .catch((err) => {
+                        toast({
+                          status: "error",
+                          description: `Note can't deleted.`,
+                        });
+                        store.setIsOpenModal(false);
+                      });
+                  }}
+                  colorScheme={"red"}
+                  isFullWidth
+                >
+                  Confirm
+                </Button>
+                <Button
+                  colorScheme={"gray"}
+                  isFullWidth
+                  onClick={() => {
+                    store.setIsOpenModal(false);
+                    store.setIsDrawerOpen(false);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Flex>
+            }
+            title="Confirm delete"
+          />
         </Stack>
       </AnimationPageLayout>
     </AppLayout>

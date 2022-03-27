@@ -17,4 +17,9 @@ public class ResponseHandler {
 
         return new ResponseEntity<Object>(map, status);
     }
+
+    private ResponseHandler() {
+        throw new IllegalStateException("Utility class");
+    }
+
 }

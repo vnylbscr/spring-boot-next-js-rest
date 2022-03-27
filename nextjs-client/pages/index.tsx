@@ -30,9 +30,11 @@ import useStore from "global-store/useStore";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import type { GetServerSidePropsContext } from "next";
-import React, { Fragment, useEffect, useRef } from "react";
-import { useQueryClient } from "react-query";
-import { User } from "types";
+import React, { Fragment, useEffect } from "react";
+import { useInView } from "react-intersection-observer";
+import { InfiniteData, useInfiniteQuery, useQueryClient } from "react-query";
+import { Note, ResObject, User, WithPagination } from "types";
+import { requests } from "@services/requests";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
@@ -86,8 +88,9 @@ const Home: React.FC<IProps> = ({ token, user }) => {
     variant: "solid",
   });
   const store = useStore();
-
-  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+  });
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -98,19 +101,26 @@ const Home: React.FC<IProps> = ({ token, user }) => {
 
   const {
     data: userNotes,
-    isLoading: userNotesLoading,
     error,
-  } = useTypeSafeQuery(
-    ["getUserNotes"],
+    isLoading: userNotesLoading,
+    fetchNextPage,
+  } = useInfiniteQuery(
+    "getUserNotes",
+    ({ pageParam = 1 }) =>
+      requests.query.getUserNotes({
+        page: pageParam,
+        userId: user.id,
+        token,
+      }),
     {
-      keepPreviousData: true,
-    },
-    {
-      userId: user.id,
-      token,
-      completed: false,
-      page: 0,
-      size: 10,
+      getNextPageParam: (lastPageData) => {
+        if (
+          lastPageData.data.hasNext &&
+          lastPageData.data.currentPage < lastPageData.data.totalPages
+        )
+          return lastPageData.data.currentPage + 1;
+        return undefined;
+      },
     }
   );
 
@@ -123,13 +133,18 @@ const Home: React.FC<IProps> = ({ token, user }) => {
       const cachedData: typeof userNotes =
         queryClient.getQueryData("getUserNotes");
 
-      if (cachedData?.data) {
-        queryClient.setQueryData("getUserNotes", {
-          ...cachedData,
-          data: {
-            ...cachedData.data,
-            items: [response, ...cachedData.data.items],
-          },
+      if (cachedData && cachedData?.pages?.length > 0) {
+        queryClient.setQueryData("getUserNotes", (data: any) => {
+          return {
+            ...data,
+            pages: data.pages.map((page: any) => ({
+              ...page,
+              data: {
+                ...page.data,
+                items: [response, ...page.data.items],
+              },
+            })),
+          };
         });
       }
     },
@@ -144,16 +159,20 @@ const Home: React.FC<IProps> = ({ token, user }) => {
       const cachedData: typeof userNotes =
         queryClient.getQueryData("getUserNotes");
 
-      if (cachedData?.data?.items) {
-        const newData = cachedData.data.items.filter(
-          (note) => note.id !== store.deletedNote
-        );
-        queryClient.setQueryData("getUserNotes", {
-          ...cachedData,
-          data: {
-            ...cachedData.data,
-            items: newData,
-          },
+      if (cachedData && cachedData?.pages?.length > 0) {
+        queryClient.setQueryData("getUserNotes", (data: any) => {
+          return {
+            ...data,
+            pages: data.pages.map((page: any) => ({
+              ...page,
+              data: {
+                ...page.data,
+                items: page.data.items.filter(
+                  (item: Note) => item.id !== response
+                ),
+              },
+            })),
+          };
         });
       }
     },
@@ -168,16 +187,20 @@ const Home: React.FC<IProps> = ({ token, user }) => {
       const cachedData: typeof userNotes =
         queryClient.getQueryData("getUserNotes");
 
-      if (cachedData?.data) {
-        const newData = cachedData.data.items.map((note) =>
-          note.id === response.id ? response : note
-        );
-        queryClient.setQueryData("getUserNotes", {
-          ...cachedData,
-          data: {
-            ...cachedData.data,
-            items: newData,
-          },
+      if (cachedData && cachedData?.pages?.length > 0) {
+        queryClient.setQueryData("getUserNotes", (data: any) => {
+          return {
+            ...data,
+            pages: data.pages.map((page: any) => ({
+              ...page,
+              data: {
+                ...page.data,
+                items: page.data.items.map((item: Note) =>
+                  item.id === response.id ? response : item
+                ),
+              },
+            })),
+          };
         });
       }
     },
@@ -192,38 +215,35 @@ const Home: React.FC<IProps> = ({ token, user }) => {
       const cachedData: typeof userNotes =
         queryClient.getQueryData("getUserNotes");
 
-      if (cachedData?.data) {
-        const newData = cachedData.data.items.map((note) =>
-          note.id === response.id ? response : note
-        );
-
-        queryClient.setQueryData("getUserNotes", {
-          ...cachedData,
-          data: {
-            ...cachedData.data,
-            items: newData,
-          },
+      if (cachedData && cachedData?.pages?.length > 0) {
+        queryClient.setQueryData("getUserNotes", (data: any) => {
+          return {
+            ...data,
+            pages: data.pages.map((page: any) => ({
+              ...page,
+              data: {
+                ...page.data,
+                items: page.data.items.map((item: Note) =>
+                  item.id === response.id ? response : item
+                ),
+              },
+            })),
+          };
         });
       }
     },
   });
 
+  useEffect(() => {
+    if (inView) {
+      // fetch
+      fetchNextPage();
+    }
+  }, [fetchNextPage, inView]);
+
   const isError = Boolean(
     error || addNoteError || completeNoteError || deleteNoteError
   );
-
-  const handleScroll = (e: React.UIEvent<HTMLDivElement, UIEvent>) => {
-    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
-    // set paging
-    if (scrollTop + clientHeight === scrollHeight) {
-      console.log("scrolled to bottom");
-    }
-
-    // set scroll position
-    if (bodyRef.current) {
-      bodyRef.current.scrollTop = scrollTop;
-    }
-  };
 
   if (isError) {
     toast({
@@ -235,7 +255,7 @@ const Home: React.FC<IProps> = ({ token, user }) => {
   return (
     <AppLayout title={"Home"}>
       <AnimationPageLayout>
-        <Box onScroll={handleScroll} ref={bodyRef}>
+        <Box>
           <Flex
             justify={"center"}
             align={"center"}
@@ -323,69 +343,67 @@ const Home: React.FC<IProps> = ({ token, user }) => {
                           </Box>
                         ) : (
                           <Fragment>
-                            {userNotes?.data?.items?.length === 0 ? (
-                              <Flex
-                                justify={"center"}
-                                direction="column"
-                                align="center"
-                                h={"600px"}
-                                gap="4"
-                              >
-                                <NoteIcon
-                                  fill={"#FFD32D"}
-                                  width={50}
-                                  height={50}
-                                />
-                                <Text fontSize={"lg"}>
-                                  You don't have any notes. You can add one by
-                                  clicking on the add button.
-                                </Text>
-                              </Flex>
-                            ) : (
-                              <Box minHeight={"60vh"}>
-                                {userNotes?.data?.items?.map((item) => (
-                                  <NoteItem
-                                    key={item.id}
-                                    onCompleted={(id) => {
-                                      console.log("completed note id", id);
-                                      completeNoteMutation([id, token])
-                                        .then((res) => {
-                                          console.log("completed note", res);
-                                          toast({
-                                            status: "success",
-                                            description: `Good job 💪 Note completed successfully.`,
-                                          });
-                                        })
-                                        .catch((err) => {
-                                          console.log("error is", err);
-                                          toast({
-                                            status: "error",
-                                            description: `Note can't completed.`,
-                                          });
-                                        });
-                                    }}
-                                    onDeleted={(id) => {
-                                      store.setDeletedNote(id);
-                                      store.setIsOpenModal(true);
-                                    }}
-                                    note={item}
-                                    onEdited={(id) => {
-                                      const foundNote =
-                                        userNotes.data.items.find?.(
-                                          (item) => item.id === id
+                            {userNotes && userNotes?.pages?.length > 0 && (
+                              <Fragment>
+                                {userNotes?.pages.map((page, index) => {
+                                  return (
+                                    <Fragment key={index}>
+                                      {page.data.items.map((item, index) => {
+                                        return (
+                                          <NoteItem
+                                            key={item.id}
+                                            onCompleted={(id) => {
+                                              console.log(
+                                                "completed note id",
+                                                id
+                                              );
+                                              completeNoteMutation([id, token])
+                                                .then((res) => {
+                                                  console.log(
+                                                    "completed note",
+                                                    res
+                                                  );
+                                                  toast({
+                                                    status: "success",
+                                                    description: `Good job 💪 Note completed successfully.`,
+                                                  });
+                                                })
+                                                .catch((err) => {
+                                                  console.log("error is", err);
+                                                  toast({
+                                                    status: "error",
+                                                    description: `Note can't completed.`,
+                                                  });
+                                                });
+                                            }}
+                                            onDeleted={(id) => {
+                                              store.setDeletedNote(id);
+                                              store.setIsOpenModal(true);
+                                            }}
+                                            note={item}
+                                            // onEdited={(id) => {
+                                            //   const foundNote =
+                                            //     userNotes.data.items.find?.(
+                                            //       (item) => item.id === id
+                                            //     );
+                                            //   if (foundNote) {
+                                            //     store.setEditedNote(
+                                            //       foundNote
+                                            //     );
+                                            //   } else {
+                                            //     console.log("note not found");
+                                            //     store.setEditedNote(null);
+                                            //   }
+                                            //   store.setIsDrawerOpen(true);
+                                            // }}
+                                          />
                                         );
-                                      if (foundNote) {
-                                        store.setEditedNote(foundNote);
-                                      } else {
-                                        console.log("note not found");
-                                        store.setEditedNote(null);
-                                      }
-                                      store.setIsDrawerOpen(true);
-                                    }}
-                                    isOpen={store.selectedNote?.id === item.id}
-                                  />
-                                ))}
-                              </Box>
+                                      })}
+                                    </Fragment>
+                                  );
+                                })}
+                                <div ref={ref}>Merto</div>
+                              </Fragment>
                             )}
                           </Fragment>
                         )}

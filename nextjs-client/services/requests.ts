@@ -31,8 +31,8 @@ const query = {
       userId,
       completed = false,
       sortBy = "createdAt",
-      page = 0,
-      size = 10,
+      page = 1,
+      size = 5,
       isDescending = true,
       token,
     } = params;

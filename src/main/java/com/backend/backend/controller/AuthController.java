@@ -72,49 +72,38 @@ public class AuthController {
 
     @PostMapping(value = "/register")
     @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
-        try {
-            if (registerRequest.getPassword() == null
-                    || registerRequest.getEmail() == null
-                    || registerRequest.getUsername() == null) {
-                throw new ResponseException("Bad credentials", HttpStatus.FORBIDDEN);
-            }
-
-            // handle register request.
-            authService.handleRegister(registerRequest);
-
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, "ok");
-        } catch (ResponseException e) {
-            logger.error("Error while registering: {}", e.getMessage());
-            return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws ResponseException {
+        if (registerRequest.getPassword() == null
+                || registerRequest.getEmail() == null
+                || registerRequest.getUsername() == null) {
+            throw new ResponseException("Bad credentials", HttpStatus.BAD_REQUEST);
         }
+
+        // handle register request.
+        authService.handleRegister(registerRequest);
+
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, "ok");
     }
 
     @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     @GetMapping(value = "/verify")
     public ResponseEntity<?> verify(@CookieValue(name = "token", defaultValue = "") String cookieToken,
-            HttpServletRequest request, HttpServletResponse response) {
+            HttpServletRequest request, HttpServletResponse response) throws ResponseException {
         Cookie cookieLoggedIn;
-        try {
-            logger.debug("Verifying token: {}", cookieToken);
-            var token = request.getHeader("token");
-            if (token == null) {
-                ResponseHandler.generateResponse("Token not found", HttpStatus.UNAUTHORIZED, null);
-            }
-            var user = authService.verifyUser(token);
-            cookieLoggedIn = new Cookie("isLoggedIn", "true");
-            cookieLoggedIn.setMaxAge(60 * 60 * 24 * 30);
-            cookieLoggedIn.setPath("/");
-            cookieLoggedIn.setHttpOnly(true);
-            cookieLoggedIn.setSecure(false);
-
-            response.addCookie(cookieLoggedIn);
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, user);
-        } catch (ResponseException e) {
-            logger.error("Error while verifying user: {}", e.getMessage());
-
-            return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
+        logger.debug("Verifying token: {}", cookieToken);
+        var token = request.getHeader("token");
+        if (token == null) {
+            ResponseHandler.generateResponse("Token not found", HttpStatus.UNAUTHORIZED, null);
         }
+        var user = authService.verifyUser(token);
+        cookieLoggedIn = new Cookie("isLoggedIn", "true");
+        cookieLoggedIn.setMaxAge(60 * 60 * 24 * 30);
+        cookieLoggedIn.setPath("/");
+        cookieLoggedIn.setHttpOnly(true);
+        cookieLoggedIn.setSecure(false);
+
+        response.addCookie(cookieLoggedIn);
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, user);
     }
 
 }

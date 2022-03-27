@@ -37,39 +37,25 @@ public class NoteController {
     @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAllNotes() {
-        try {
-            log.info("getAllNotes");
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAll());
-        } catch (Exception e) {
-            log.error("getAllNotes", e);
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+        log.info("getAllNotes");
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getAll());
+
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping("/search")
     public ResponseEntity<?> searchNote(@RequestParam(value = "query", required = false) String search,
             @RequestParam(value = "user", required = false) String userId) {
-        try {
-            log.info("searchNote");
-            return ResponseHandler.generateResponse("success", HttpStatus.OK,
-                    this.noteService.searchNote(search, userId));
-        } catch (Exception e) {
-            log.error("getAllNotes", e);
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+        log.info("searchNote");
+        return ResponseHandler.generateResponse("success", HttpStatus.OK,
+                this.noteService.searchNote(search, userId));
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping()
     public ResponseEntity<?> getSingleNote(@RequestParam String id) {
-        try {
-            log.info("getAllNotes");
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(id));
-        } catch (Exception e) {
-            log.error("getAllNotes", e);
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+        log.info("getAllNotes");
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(id));
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
@@ -80,57 +66,38 @@ public class NoteController {
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
-        try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK,
-                    this.noteService.getAllByUserId(userId, completed, isDescending, sortBy, page, size));
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+        return ResponseHandler.generateResponse("success", HttpStatus.OK,
+                this.noteService.getAllByUserId(userId, completed, isDescending, sortBy, page, size));
+
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/create")
-    public ResponseEntity<?> createNote(@Valid @RequestBody CreateNoteDto noteDto) {
-        try {
-            log.info("createNote color", noteDto.getColor());
-            return ResponseHandler.generateResponse("success", HttpStatus.CREATED,
-                    this.noteService.createNote(noteDto));
-        } catch (ResponseException e) {
-            log.error("createNote", e.getMessage());
-            return ResponseHandler.generateResponse(e.getMessage(), e.getStatus(), null);
-        }
+    public ResponseEntity<?> createNote(@Valid @RequestBody CreateNoteDto noteDto) throws ResponseException {
+        log.info("createNote color", noteDto.getColor());
+        return ResponseHandler.generateResponse("success", HttpStatus.CREATED,
+                this.noteService.createNote(noteDto));
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @DeleteMapping()
     public ResponseEntity<?> deleteNote(@Valid @RequestParam @NotBlank(message = "id can't be blank") String id) {
-        try {
-            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
-                    this.noteService.deleteNote(id));
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+        return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
+                this.noteService.deleteNote(id));
+
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/complete")
-    public ResponseEntity<?> completeNote(@Valid @RequestParam String id) {
-        try {
-            return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
-                    this.noteService.completeNote(id));
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+    public ResponseEntity<?> completeNote(@Valid @RequestParam String id) throws ResponseException {
+        return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
+                this.noteService.completeNote(id));
+
     }
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/updateNote")
-    public ResponseEntity<?> updateNote(@Valid @RequestBody NoteEntity note) {
-        try {
-            return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.updateNote(note));
-        } catch (Exception e) {
-            // TODO: handle exception
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.BAD_REQUEST, null);
-        }
+    public ResponseEntity<?> updateNote(@Valid @RequestBody NoteEntity note) throws ResponseException {
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.updateNote(note));
     }
 }

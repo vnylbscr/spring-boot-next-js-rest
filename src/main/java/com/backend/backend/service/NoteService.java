@@ -84,21 +84,23 @@ public class NoteService {
         return null;
     }
 
-    public NoteEntity updateNote(NoteEntity note) {
+    public NoteEntity updateNote(NoteEntity note) throws ResponseException {
         var existNote = noteReposity.findById(note.getId());
         if (existNote.isPresent()) {
             return noteReposity.save(note);
         }
-        return null;
+
+        throw new ResponseException("Note not exist.", HttpStatus.NOT_FOUND);
     }
 
-    public GetNoteDto completeNote(String noteId) {
+    public GetNoteDto completeNote(String noteId) throws ResponseException {
         var existNote = noteReposity.findById(noteId);
         if (existNote.isPresent()) {
             existNote.get().setCompleted(true);
             return convertNoteDto(noteReposity.save(existNote.get()));
         }
-        return null;
+
+        throw new ResponseException("Note not exist.", HttpStatus.NOT_FOUND);
     }
 
     private List<GetNoteDto> convertNoteDtos(List<NoteEntity> notes) {

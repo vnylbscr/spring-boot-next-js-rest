@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// create a template class with paging and hasNext and hasPrevious fields
 @Getter
 @Setter
 @AllArgsConstructor

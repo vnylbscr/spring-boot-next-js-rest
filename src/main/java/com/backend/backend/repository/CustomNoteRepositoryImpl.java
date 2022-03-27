@@ -41,21 +41,22 @@ public class CustomNoteRepositoryImpl implements CustomNoteRepository {
         }
 
         int currentPage = page;
-        int totalPages = (int) Math.ceil(totalCount / size);
+        int totalPages = (int) Math.ceil(totalCount / size) + 1;
         boolean hasNext = false;
         boolean hasPrevious = false;
+
+        if (currentPage > totalPages) {
+            throw new IllegalArgumentException("Page number is greater than total count");
+        }
+
         if (page * size < totalCount) {
             hasNext = true;
         }
-        if (page > 0) {
+        if (page > 1) {
             hasPrevious = true;
         }
 
         query.skip((page - 1) * size).limit(size);
-
-        // create sort object
-        query.skip(page * size);
-        query.limit(size);
 
         // create sort
         Sort sort = null;
