@@ -1,5 +1,4 @@
 /* eslint-disable react/no-unescaped-entities */
-import { NoteIcon } from "@assets/icons";
 import {
   Box,
   Button,
@@ -24,17 +23,16 @@ import WelcomeSection from "@components/welcomeSection";
 import AnimationPageLayout from "@layouts/animation-layout";
 import AppLayout from "@layouts/appLayout";
 import { END_POINT } from "@lib/constants";
+import { requests } from "@services/requests";
 import axios from "axios";
 import cookie from "cookie";
 import useStore from "global-store/useStore";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
-import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import type { GetServerSidePropsContext } from "next";
 import React, { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { InfiniteData, useInfiniteQuery, useQueryClient } from "react-query";
-import { Note, ResObject, User, WithPagination } from "types";
-import { requests } from "@services/requests";
+import { useInfiniteQuery, useQueryClient } from "react-query";
+import { Note, User } from "types";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {
@@ -89,9 +87,11 @@ const Home: React.FC<IProps> = ({ token, user }) => {
   });
   const store = useStore();
   const { ref, inView } = useInView({
-    threshold: 0.5,
+    threshold: 0,
+    rootMargin: "25px 0px",
   });
   const queryClient = useQueryClient();
+  console.log("store is", store);
 
   useEffect(() => {
     store.setToken(token);
@@ -104,6 +104,7 @@ const Home: React.FC<IProps> = ({ token, user }) => {
     error,
     isLoading: userNotesLoading,
     fetchNextPage,
+    hasNextPage,
   } = useInfiniteQuery(
     "getUserNotes",
     ({ pageParam = 1 }) =>
@@ -111,6 +112,7 @@ const Home: React.FC<IProps> = ({ token, user }) => {
         page: pageParam,
         userId: user.id,
         token,
+        completed: store.activeTab === "completed" ? true : false,
       }),
     {
       getNextPageParam: (lastPageData) => {
@@ -168,7 +170,7 @@ const Home: React.FC<IProps> = ({ token, user }) => {
               data: {
                 ...page.data,
                 items: page.data.items.filter(
-                  (item: Note) => item.id !== response
+                  (item: Note) => item.id !== store.deletedNote
                 ),
               },
             })),
@@ -236,7 +238,6 @@ const Home: React.FC<IProps> = ({ token, user }) => {
 
   useEffect(() => {
     if (inView) {
-      // fetch
       fetchNextPage();
     }
   }, [fetchNextPage, inView]);
@@ -381,28 +382,49 @@ const Home: React.FC<IProps> = ({ token, user }) => {
                                               store.setIsOpenModal(true);
                                             }}
                                             note={item}
-                                            // onEdited={(id) => {
-                                            //   const foundNote =
-                                            //     userNotes.data.items.find?.(
-                                            //       (item) => item.id === id
-                                            //     );
-                                            //   if (foundNote) {
-                                            //     store.setEditedNote(
-                                            //       foundNote
-                                            //     );
-                                            //   } else {
-                                            //     console.log("note not found");
-                                            //     store.setEditedNote(null);
-                                            //   }
-                                            //   store.setIsDrawerOpen(true);
-                                            // }}
+                                            onEdited={(id) => {
+                                              const foundNote = userNotes?.pages
+                                                .find((page) => {
+                                                  return page.data.items.find(
+                                                    (item) => {
+                                                      return item.id === id;
+                                                    }
+                                                  );
+                                                })
+                                                ?.data.items.find((item) => {
+                                                  return item.id === id;
+                                                });
+
+                                              console.log(
+                                                "itemmm on edited",
+                                                foundNote
+                                              );
+
+                                              if (foundNote) {
+                                                store.setEditedNote(foundNote);
+                                              }
+
+                                              store.setIsDrawerOpen(true);
+                                            }}
                                           />
                                         );
                                       })}
                                     </Fragment>
                                   );
                                 })}
-                                <div ref={ref}>Merto</div>
+                                <div ref={ref} />
+                                {!hasNextPage && (
+                                  <Box
+                                    p={4}
+                                    bg="transparent"
+                                    boxShadow="lg"
+                                    width={"full"}
+                                  >
+                                    <Text fontSize="lg">
+                                      No more notes to show
+                                    </Text>
+                                  </Box>
+                                )}
                               </Fragment>
                             )}
                           </Fragment>
@@ -416,11 +438,18 @@ const Home: React.FC<IProps> = ({ token, user }) => {
                     </TabPanels>
                   </Tabs>
 
-                  <EditNoteDrawer
-                    onSubmit={(data) => {
-                      console.log("edit note drawer mutation", data);
-                    }}
-                  />
+                  {store.isDrawerOpen && (
+                    <EditNoteDrawer
+                      onSubmit={(data) => {
+                        console.log("edit note drawer mutation", data);
+                      }}
+                      isOpen={store.isDrawerOpen}
+                      onClose={() => {
+                        store.setIsDrawerOpen(false);
+                      }}
+                      note={store.editedNote}
+                    />
+                  )}
 
                   <MyModal
                     isOpen={store.isOpenModal}

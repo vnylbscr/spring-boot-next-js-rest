@@ -7,18 +7,18 @@ type TabType = "active" | "completed";
 const useStore = create(
   combine(
     {
-      selectedNote: null as unknown as Note | null,
+      selectedNote: undefined as unknown as Note | undefined,
       notes: [] as Note[],
       isDrawerOpen: false,
       activeTab: "active" as TabType,
       isOpenModal: false,
       deletedNote: null as unknown as string,
-      editedNote: null as unknown as Note | null,
-      token: null as unknown as string,
-      user: null as unknown as User | null,
+      editedNote: undefined as unknown as Note | undefined,
+      token: undefined as unknown as string,
+      user: undefined as unknown as User | undefined,
     },
     (set) => ({
-      setSelectedNote: (note: Note | null) =>
+      setSelectedNote: (note: Note) =>
         set({
           selectedNote: note,
         }),
@@ -42,7 +42,7 @@ const useStore = create(
         set({
           deletedNote: note,
         }),
-      setEditedNote: (note: Note | null) =>
+      setEditedNote: (note: Note) =>
         set({
           editedNote: note,
         }),
@@ -50,7 +50,7 @@ const useStore = create(
         set({
           token,
         }),
-      setUser: (user: User | null) =>
+      setUser: (user: User) =>
         set({
           user,
         }),

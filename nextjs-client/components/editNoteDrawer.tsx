@@ -19,6 +19,9 @@ import MyInput from "./my-input";
 
 interface Props {
   onSubmit: (data: IState) => void;
+  onClose: () => void;
+  isOpen: boolean;
+  note?: Note;
 }
 
 interface IState {
@@ -27,33 +30,32 @@ interface IState {
   id: string;
 }
 
-const EditNoteDrawer: React.FC<Props> = ({ onSubmit }) => {
-  const { selectedNote, setIsDrawerOpen, isDrawerOpen } = useStore();
+const EditNoteDrawer: React.FC<Props> = ({
+  onSubmit,
+  note: selectedNote,
+  isOpen,
+  onClose,
+}) => {
   const { control, handleSubmit, watch } = useForm({
     defaultValues: {
-      title: selectedNote?.title ?? "",
-      text: selectedNote?.text ?? "",
+      title: selectedNote?.title || "",
+      text: selectedNote?.text || "",
     },
   });
+
   const { mutateAsync } = useTypeSafeMutation("updateNote");
 
   const handleOnSubmit = handleSubmit((data) => {
     onSubmit({
       ...data,
-      id: selectedNote?.id ?? "",
+      id: selectedNote?.id || "",
     });
   });
 
-  console.log("selectedNote text", selectedNote?.text);
+  console.log("selectedNote text drawer", selectedNote?.text);
 
   return (
-    <Drawer
-      placement={"right"}
-      onClose={() => {
-        setIsDrawerOpen(false);
-      }}
-      isOpen={isDrawerOpen}
-    >
+    <Drawer placement={"right"} onClose={onClose} isOpen={isOpen}>
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
@@ -90,12 +92,7 @@ const EditNoteDrawer: React.FC<Props> = ({ onSubmit }) => {
           </DrawerBody>
           <DrawerFooter borderBottomWidth={"1px"}>
             <Stack spacing={2} direction="row">
-              <Button
-                colorScheme={"red"}
-                onClick={() => {
-                  setIsDrawerOpen(false);
-                }}
-              >
+              <Button colorScheme={"red"} onClick={onClose}>
                 Cancel
               </Button>
               <Button type="submit" colorScheme={"teal"}>

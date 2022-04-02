@@ -13,6 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import useSearchStore from "global-store/useSearchStore";
+import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
+import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
@@ -29,6 +31,7 @@ const Appbar: React.FC = ({}) => {
   // const debouncedValue = useDebounce(searchValue.trim(), 1000);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
+  const { mutateAsync } = useTypeSafeMutation("logout");
 
   useEffect(() => {
     const cmdK = (e: KeyboardEvent) => {
@@ -59,6 +62,13 @@ const Appbar: React.FC = ({}) => {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
+  };
+
+  const handleLogout = () => {
+    mutateAsync([], {}).then(() => {
+      localStorage.removeItem("token");
+      router.push("/login");
+    });
   };
 
   return (
@@ -164,8 +174,14 @@ const Appbar: React.FC = ({}) => {
           <Link href={"/shortcuts"} passHref>
             <Button colorScheme={"teal"}>Shortcuts</Button>
           </Link>
+
+          <Button onClick={handleLogout} colorScheme={"red"}>
+            Logout
+          </Button>
         </Stack>
       </Box>
+
+      {/* Logout button */}
     </Flex>
   );
 };

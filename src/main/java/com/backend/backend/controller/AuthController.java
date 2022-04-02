@@ -106,4 +106,21 @@ public class AuthController {
         return ResponseHandler.generateResponse("success", HttpStatus.OK, user);
     }
 
+    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
+    @PostMapping(value = "/logout")
+    public ResponseEntity<?> logout(@CookieValue(name = "token", defaultValue = "") String cookieToken,
+            HttpServletRequest request, HttpServletResponse response) throws ResponseException {
+        var token = request.getHeader("token");
+        if (token == null) {
+            ResponseHandler.generateResponse("Token not found", HttpStatus.UNAUTHORIZED, null);
+        }
+        Cookie cookieLoggedIn = new Cookie("isLoggedIn", "false");
+        cookieLoggedIn.setMaxAge(60 * 60 * 24 * 30);
+        cookieLoggedIn.setPath("/");
+        cookieLoggedIn.setHttpOnly(true);
+        cookieLoggedIn.setSecure(false);
+        response.addCookie(cookieLoggedIn);
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, "ok");
+    }
+
 }

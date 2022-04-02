@@ -86,13 +86,13 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
   return (
     <AppLayout>
       <AnimationPageLayout>
-        <Stack width={"full"} height={"100vh"} padding={8}>
+        <Stack width={"full"} minHeight={"100vh"} padding={8}>
           {data?.data.length === 0 ? (
             <Flex direction={"column"} justify="center" align={"center"}>
               <Text align={"center"} fontSize={"2xl"}>
                 No results found for: "{searchValue}"{" "}
               </Text>
-              <Button onClick={() => router.back()}>Go back</Button>
+              <Button onClick={() => router.push("/")}>Go back</Button>
             </Flex>
           ) : (
             <Flex direction={"column"}>

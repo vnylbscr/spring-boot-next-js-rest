@@ -12,5 +12,3 @@ const theme = extendTheme({
   //   body: "Source Sans Pro, sans-serif",
   // },
 });
-
-export default theme;

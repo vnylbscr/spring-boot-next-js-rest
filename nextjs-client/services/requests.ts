@@ -83,11 +83,6 @@ const mutation = {
       })
       .then((res) => res.data);
   },
-  logout: async (): Promise<ResObject<String>> => {
-    return client()
-      .post(`/auth/logout`)
-      .then((res) => res.data);
-  },
   addNote: async (
     data: CreateNote,
     token: string
@@ -100,7 +95,7 @@ const mutation = {
   deleteNote: async (
     noteId: string,
     token: string
-  ): Promise<ResObject<String>> => {
+  ): Promise<ResObject<boolean>> => {
     return client(token)
       .delete(`/note?id=${noteId}`)
       .then((res) => res.data);
@@ -120,6 +115,11 @@ const mutation = {
   ): Promise<ResObject<Note>> => {
     return client(token)
       .post(`/note/complete?id=${noteId}`)
+      .then((res) => res.data);
+  },
+  logout: async (): Promise<ResObject<string>> => {
+    return axios
+      .post(`${END_POINT}/auth/logout`, { withCredentials: true })
       .then((res) => res.data);
   },
 };

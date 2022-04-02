@@ -81,7 +81,7 @@ public class NoteService {
 
     public Optional<Boolean> deleteNote(String noteId) {
         noteReposity.deleteById(noteId);
-        return null;
+        return noteId == null ? Optional.empty() : Optional.of(true);
     }
 
     public NoteEntity updateNote(NoteEntity note) throws ResponseException {

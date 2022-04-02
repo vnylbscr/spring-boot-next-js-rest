@@ -1,7 +1,7 @@
 package com.backend.backend.repository;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import com.backend.backend.model.NoteEntity;
 import com.backend.backend.util.WithPagination;
@@ -87,13 +87,15 @@ public class CustomNoteRepositoryImpl implements CustomNoteRepository {
     @Override
     public List<NoteEntity> searchNote(String search, String userId) {
         Query query = new Query();
-        // search multiple fields
-        Pattern pattern = Pattern.compile(".*" + search + ".*", Pattern.CASE_INSENSITIVE);
-        // query.addCriteria(Criteria.where("user").is(userId));
-        query.addCriteria(Criteria.where("title").regex(pattern));
-        query.addCriteria(Criteria.where("text").regex(pattern));
-
-        return mongoTemplate.find(query, NoteEntity.class);
+        List<Criteria> criterias = new ArrayList<>();
+        if (search != null && !search.isEmpty()) {
+            criterias.add(Criteria.where("title").regex(search, "i"));
+            criterias.add(Criteria.where("text").regex(search, "i"));
+        }
+        query.addCriteria(new Criteria().orOperator(criterias.toArray(new Criteria[criterias.size()])));
+        query.addCriteria(Criteria.where("userId").is(userId));
+        List<NoteEntity> notes = mongoTemplate.find(query, NoteEntity.class);
+        return notes;
     }
 
 }

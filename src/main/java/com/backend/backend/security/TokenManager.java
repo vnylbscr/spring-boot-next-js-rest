@@ -20,7 +20,7 @@ import io.jsonwebtoken.security.SignatureException;
 public class TokenManager {
     private final int validTime = 100 * 60 * 60 * 1000;
 
-    private String secret = "TUVSVE8gTEFMQSBTUFJJTkcgQVBQIFdJVEggTkVYVCBKUw==";
+    private String secret = "s6v9y$B&E)H@McQeThWmZq4t7w!z%C*F-JaNdRgUjXn2r5u8x/A?D(G+KbPeShVm";
     // create a secret key for signing the token
     private Key key = Keys.hmacShaKeyFor(secret.getBytes());
 
