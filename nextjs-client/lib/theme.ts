@@ -8,7 +8,9 @@ const config: ThemeConfig = {
 const theme = extendTheme({
   config,
   // fonts: {
-  //   heading: "Source Sans Pro, sans-serif",
-  //   body: "Source Sans Pro, sans-serif",
+  //   heading: "Fira Code, monospace",
+  //   body: "Fira Code, monospace",
   // },
 });
+
+export default theme;

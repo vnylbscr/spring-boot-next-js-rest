@@ -1,0 +1,19 @@
+spring:
+  data:
+    mongodb:
+      auto-index-creation: true
+      uri: ${MONGODB_URI}
+      database: ${MONGO_DB_NAME}
+  main:
+    allow-circular-references: true
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v1/api-docs
+    title: Spring-Next-Docs
+    description: Spring Boot REST API
+
+logging:
+  level:
+    "[org.springframework.security]": TRACE

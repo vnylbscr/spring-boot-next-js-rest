@@ -21,8 +21,8 @@ public class BackendApplication {
 	}
 
 	@Bean
-	public OpenAPI customOpenAPI(@Value("${springdoc.api.title}") String title,
-			@Value("${springdoc.api.description}") String description) {
+	public OpenAPI customOpenAPI(@Value("${springdoc.api-docs.title}") String title,
+			@Value("${springdoc.api-docs.description}") String description) {
 		return new OpenAPI().info(new Info().title(title).description(description))
 				.components(new Components().addSecuritySchemes("Authorization", new SecurityScheme()
 						.type(SecurityScheme.Type.APIKEY).in(SecurityScheme.In.HEADER).name("Authorization")))

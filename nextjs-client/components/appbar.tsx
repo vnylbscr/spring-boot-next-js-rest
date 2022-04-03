@@ -14,7 +14,6 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import useSearchStore from "global-store/useSearchStore";
 import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
-import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";

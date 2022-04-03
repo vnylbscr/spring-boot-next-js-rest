@@ -80,12 +80,6 @@ public class UserService {
         return foundUser;
     }
 
-    public void deleteUser(String id) {
-        this.userRepository.deleteById(id);
-    }
-
-   
-
     private List<GetUserDto> convertUserDtos(List<UserEntity> users) {
         List<GetUserDto> usersResp = new ArrayList<>();
         users.forEach(user -> {
