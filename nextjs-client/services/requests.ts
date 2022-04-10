@@ -91,7 +91,6 @@ const mutation = {
       .post(`/note/create`, data)
       .then((res) => res.data);
   },
-
   deleteNote: async (
     noteId: string,
     token: string
@@ -100,11 +99,15 @@ const mutation = {
       .delete(`/note?id=${noteId}`)
       .then((res) => res.data);
   },
-  updateNote: async (
-    noteId: string,
-    data: CreateNote,
-    token: string
-  ): Promise<ResObject<Note>> => {
+  updateNote: async ({
+    noteId,
+    data,
+    token,
+  }: {
+    noteId: string;
+    data: Omit<CreateNote, "userId">;
+    token: string;
+  }): Promise<ResObject<Note>> => {
     return client(token)
       .put(`/note?id=${noteId}`, data)
       .then((res) => res.data);
@@ -119,7 +122,7 @@ const mutation = {
   },
   logout: async (): Promise<ResObject<string>> => {
     return axios
-      .post(`${END_POINT}/auth/logout`, { withCredentials: true })
+      .post(`${END_POINT}/auth/logout`, {}, { withCredentials: true })
       .then((res) => res.data);
   },
 };

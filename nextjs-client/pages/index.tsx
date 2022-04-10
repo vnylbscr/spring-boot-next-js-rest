@@ -254,7 +254,7 @@ const Home: React.FC<IProps> = ({ token, user }) => {
   }
 
   return (
-    <AppLayout title={"Home"}>
+    <AppLayout isLoggedIn={Boolean(user || token)} title={"Home"}>
       <AnimationPageLayout>
         <Box>
           <Flex
@@ -441,7 +441,25 @@ const Home: React.FC<IProps> = ({ token, user }) => {
                   {store.isDrawerOpen && (
                     <EditNoteDrawer
                       onSubmit={(data) => {
-                        console.log("edit note drawer mutation", data);
+                        updateNoteMutation([
+                          {
+                            noteId: data.id,
+                            data,
+                            token,
+                          },
+                        ])
+                          .then((res) => {
+                            toast({
+                              status: "success",
+                              description: `Note updated successfully.`,
+                            });
+                          })
+                          .catch((err) => {
+                            toast({
+                              status: "error",
+                              description: `Note can't updated.`,
+                            });
+                          });
                       }}
                       isOpen={store.isDrawerOpen}
                       onClose={() => {

@@ -17,7 +17,7 @@ import { useTypeSafeMutation } from "hooks/useTypeSafeMutation";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useRef } from "react";
-
+import { FONT_FAMILY } from "./headingWithCustomFont";
 const iconSettings = {
   width: 20,
   height: 20,
@@ -66,6 +66,7 @@ const Appbar: React.FC = ({}) => {
   const handleLogout = () => {
     mutateAsync([], {}).then(() => {
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
       router.push("/login");
     });
   };
@@ -87,9 +88,8 @@ const Appbar: React.FC = ({}) => {
         <Link passHref={true} href="/">
           <Button
             variant={"outline"}
-            fontStyle={"italic"}
-            fontWeight={"bold"}
             fontSize={"xl"}
+            fontFamily={FONT_FAMILY.BEBAS_NEUE}
           >
             {" "}
             Notestack.{" "}

@@ -30,6 +30,8 @@ const MyInput = <T extends FieldValues>(props: Props<T>) => {
           <InputGroup>
             <Input
               isInvalid={Boolean(error?.message)}
+              {...renderStyleProps}
+              {...field}
               type={
                 renderStyleProps?.type === "password"
                   ? show
@@ -37,11 +39,9 @@ const MyInput = <T extends FieldValues>(props: Props<T>) => {
                     : "password"
                   : "text"
               }
-              {...field}
-              {...renderStyleProps}
             />
             {renderStyleProps?.type === "password" && field.value && (
-              <InputRightElement>
+              <InputRightElement mr={4}>
                 <Button
                   onClick={handleClick}
                   colorScheme={"teal"}

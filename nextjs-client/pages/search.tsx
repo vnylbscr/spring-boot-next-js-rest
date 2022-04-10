@@ -22,7 +22,8 @@ import { useTypeSafeQuery } from "hooks/useTypeSafeQuery";
 import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
-import { User } from "types";
+import { useQueryClient } from "react-query";
+import { User, Note, ResObject } from "types";
 
 type Props = {
   user: User;
@@ -33,6 +34,7 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
   const router = useRouter();
   const searchValue = router.query.q as string;
   const store = useStore();
+  const queryClient = useQueryClient();
 
   const toast = useToast({
     position: "bottom-right",
@@ -40,7 +42,13 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
     variant: "solid",
   });
 
-  const { data, error, isLoading, refetch, isRefetching } = useTypeSafeQuery(
+  const {
+    data: foundItems,
+    error,
+    isLoading,
+    refetch,
+    isRefetching,
+  } = useTypeSafeQuery(
     "searchNote",
     {
       enabled: Boolean(searchValue),
@@ -56,7 +64,25 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
     mutateAsync: deleteNoteMutation,
     isLoading: deleteNoteMutationLoading,
     isError: deleteMutationisError,
-  } = useTypeSafeMutation("deleteNote");
+  } = useTypeSafeMutation("deleteNote", {
+    onSuccess: ({ data }) => {
+      // delete from cache
+      const deletedId = store.deletedNote;
+      const cachedData = queryClient.getQueryData("searchNote") as
+        | ResObject<Note[]>
+        | undefined;
+
+      if (deletedId && cachedData) {
+        const newData = cachedData.data.filter((item) => item.id !== deletedId);
+        queryClient.setQueryData("searchNote", (existData) => {
+          return {
+            ...cachedData,
+            data: newData,
+          };
+        }) as ResObject<Note[]> | undefined;
+      }
+    },
+  });
 
   const {
     mutateAsync: updateNoteMutation,
@@ -73,7 +99,7 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
 
   if (isLoading || isRefetching) {
     return (
-      <AppLayout>
+      <AppLayout title={"Search"} isLoggedIn>
         <Box padding="6" boxShadow="lg" bg="transparent" width={"full"}>
           {[1, 2, 3].map((item, index) => {
             return <SkeletonNote key={index} />;
@@ -84,10 +110,10 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
   }
 
   return (
-    <AppLayout>
+    <AppLayout title={"Search found"} isLoggedIn>
       <AnimationPageLayout>
         <Stack width={"full"} minHeight={"100vh"} padding={8}>
-          {data?.data.length === 0 ? (
+          {foundItems?.data.length === 0 ? (
             <Flex direction={"column"} justify="center" align={"center"}>
               <Text align={"center"} fontSize={"2xl"}>
                 No results found for: "{searchValue}"{" "}
@@ -97,9 +123,9 @@ const SearchPage: React.FC<Props> = ({ user, token }) => {
           ) : (
             <Flex direction={"column"}>
               <Text textAlign={"center"} fontSize="3xl" fontWeight={"bold"}>
-                Found {data?.data.length} results for: "{searchValue}"
+                Found {foundItems?.data.length} results for: "{searchValue}"
               </Text>
-              {data?.data.map((note) => (
+              {foundItems?.data.map((note) => (
                 <Flex direction={"column"} w="full" key={note.id}>
                   <NoteItem
                     onDeleted={(id) => {

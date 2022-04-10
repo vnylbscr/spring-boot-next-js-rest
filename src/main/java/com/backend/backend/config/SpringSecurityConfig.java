@@ -44,6 +44,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AuthEntryPoint authEntryPoint;
+
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -70,6 +71,18 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated()
                 .and()
+                .logout(logout -> {
+                    logout.logoutUrl("/auth/logout");
+                    logout.deleteCookies("isLoggedIn", "JSESSIONID", "token");
+                    logout.clearAuthentication(true);
+                    logout.invalidateHttpSession(true);
+                    // The value of the 'Access-Control-Allow-Credentials' header in the response is
+                    // '' which must be 'true' when the request's credentials mode is 'include'. The
+                    // credentials mode of requests initiated by the XMLHttpRequest is controlled by
+                    // the withCredentials attribute.
+                    logout.logoutSuccessHandler((req, res, authentication) -> res.setStatus(200));
+                    logout.permitAll();
+                })
                 .exceptionHandling().authenticationEntryPoint(authEntryPoint);
         // settings for cors
         http.cors();
@@ -82,7 +95,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3007"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3007", "http://localhost:8080"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "DELETE", "PUT", "PATCH"));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));

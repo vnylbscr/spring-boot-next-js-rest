@@ -1,18 +1,19 @@
 import { Heading } from "@chakra-ui/react";
 import useSearchStore from "global-store/useSearchStore";
 import React, { Fragment } from "react";
+import HeadingWithCustomFont from "./headingWithCustomFont";
 
 type Props = {
   username: string;
 };
 
 const WelcomeSection = (props: Props) => {
-  console.log("rendered");
-
   return (
     <Fragment>
-      <Heading>Welcome, {props.username} </Heading>
-      <Heading fontSize={"xl"}>
+      <HeadingWithCustomFont fontSize={"4xl"}>
+        Welcome, {props.username}{" "}
+      </HeadingWithCustomFont>
+      <HeadingWithCustomFont fontSize={"xl"}>
         Today is{" "}
         {new Date().toLocaleDateString("en-US", {
           weekday: "long",
@@ -26,7 +27,7 @@ const WelcomeSection = (props: Props) => {
           minute: "numeric",
           hour12: false,
         })}
-      </Heading>
+      </HeadingWithCustomFont>
     </Fragment>
   );
 };

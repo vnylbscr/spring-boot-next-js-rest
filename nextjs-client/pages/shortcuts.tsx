@@ -1,4 +1,5 @@
 import {
+  Button,
   Container,
   Stack,
   Table,
@@ -12,13 +13,14 @@ import {
 } from "@chakra-ui/react";
 import AnimationPageLayout from "@layouts/animation-layout";
 import AppLayout from "@layouts/appLayout";
+import Link from "next/link";
 import React from "react";
 
 type Props = {};
 
 const ShortcutsPage = (props: Props) => {
   return (
-    <AppLayout title={"Shortcuts"}>
+    <AppLayout isLoggedIn title={"Shortcuts"}>
       <AnimationPageLayout>
         <Container maxW={"container.xl"} h="100vh">
           <Stack justify={"center"} mt="14" align="center">
@@ -53,6 +55,11 @@ const ShortcutsPage = (props: Props) => {
                 </Tr>
               </Tbody>
             </Table>
+            <Button colorScheme={"messenger"}>
+              <Link href={"/"} passHref>
+                Go Back
+              </Link>
+            </Button>
           </Stack>
         </Container>
       </AnimationPageLayout>{" "}
