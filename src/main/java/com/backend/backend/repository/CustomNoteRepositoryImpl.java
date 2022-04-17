@@ -36,6 +36,19 @@ public class CustomNoteRepositoryImpl implements CustomNoteRepository {
         // pagination fields
         int totalCount = (int) mongoTemplate.count(query, NoteEntity.class);
 
+        if (totalCount == 0) {
+            WithPagination<NoteEntity> result = new WithPagination<>();
+            result.setItems(new ArrayList<>());
+            result.setCurrentPage(page);
+            result.setHasNext(false);
+            result.setHasPrevious(false);
+            result.setPage(page);
+            result.setSize(size);
+            result.setTotalPages(1);
+            result.setTotalCount(totalCount);
+            return result;
+        }
+
         if (page > totalCount) {
             throw new IllegalArgumentException("Page number is greater than total count");
         }

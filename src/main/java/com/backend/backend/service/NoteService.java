@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.backend.backend.dto.CreateNoteDto;
 import com.backend.backend.dto.GetNoteDto;
+import com.backend.backend.dto.UpdateNoteDto;
 import com.backend.backend.exception.ResponseException;
 import com.backend.backend.model.NoteEntity;
 import com.backend.backend.model.UserEntity;
@@ -84,10 +85,14 @@ public class NoteService {
         return noteId == null ? Optional.empty() : Optional.of(true);
     }
 
-    public NoteEntity updateNote(NoteEntity note) throws ResponseException {
+    public NoteEntity updateNote(UpdateNoteDto note) throws ResponseException {
         var existNote = noteReposity.findById(note.getId());
         if (existNote.isPresent()) {
-            return noteReposity.save(note);
+            NoteEntity noteEntity = existNote.get();
+            noteEntity.setText(note.getText());
+            noteEntity.setTitle(note.getTitle());
+            noteEntity.setColor(note.getColor().toString());
+            return noteReposity.save(noteEntity);
         }
 
         throw new ResponseException("Note not exist.", HttpStatus.NOT_FOUND);

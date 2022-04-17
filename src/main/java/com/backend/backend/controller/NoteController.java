@@ -4,8 +4,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
 import com.backend.backend.dto.CreateNoteDto;
+import com.backend.backend.dto.UpdateNoteDto;
 import com.backend.backend.exception.ResponseException;
-import com.backend.backend.model.NoteEntity;
 import com.backend.backend.service.NoteService;
 import com.backend.backend.util.ResponseHandler;
 
@@ -95,7 +95,7 @@ public class NoteController {
 
     @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/updateNote")
-    public ResponseEntity<?> updateNote(@Valid @RequestBody NoteEntity note) throws ResponseException {
-        return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.updateNote(note));
+    public ResponseEntity<?> updateNote(@Valid @RequestBody UpdateNoteDto updateNoteDto) throws ResponseException {
+        return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.updateNote(updateNoteDto));
     }
 }
