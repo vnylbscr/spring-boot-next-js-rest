@@ -23,7 +23,7 @@ import WelcomeSection from "@components/welcomeSection";
 import AnimationPageLayout from "@layouts/animation-layout";
 import AppLayout from "@layouts/appLayout";
 import { END_POINT } from "@lib/constants";
-import { requests } from "@services/requests";
+import { requests } from "@services/api";
 import axios from "axios";
 import cookie from "cookie";
 import useStore from "global-store/useStore";
@@ -32,7 +32,7 @@ import type { GetServerSidePropsContext } from "next";
 import React, { Fragment, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { useInfiniteQuery, useQueryClient } from "react-query";
-import { Note, User } from "types";
+import { Note, User, Mert } from "types";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   try {

@@ -80,3 +80,5 @@ export type GetSearchQueryParams = {
   user?: string;
   token: string;
 };
+
+export type Mert<T> = <K extends keyof T>(key: K) => T[K];

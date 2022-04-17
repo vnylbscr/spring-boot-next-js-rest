@@ -35,6 +35,8 @@ public class AuthController {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    // selam aga
+
     private final static Logger logger = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired

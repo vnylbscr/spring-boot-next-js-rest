@@ -1,4 +1,4 @@
-import { requests } from "@services/requests";
+import { requests } from "@services/api";
 import { useMutation, UseMutationOptions } from "react-query";
 import { Await } from "types";
 
