@@ -10,12 +10,13 @@ import com.backend.backend.service.UserService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
     private UserService userService;
@@ -33,7 +34,6 @@ public class UserServiceTest {
 
     @Test
     public void when_call_getUserWithEntity() {
-        // TODO
         UserEntity userEntity = new UserEntity("merto", "test@test.com", "123123");
         Mockito.when(userRepository.findById(userEntity.getId())).thenReturn(Optional.of(userEntity));
         UserEntity result = userService.getUserWithEntity(userEntity.getId()).get();

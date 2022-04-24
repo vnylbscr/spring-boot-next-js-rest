@@ -49,3 +49,5 @@ yarn-error.log*
 
 src/main/resources/client/node_modules
 src/main/resources/client/coverage
+
+*.env
