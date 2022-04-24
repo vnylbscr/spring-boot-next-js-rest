@@ -2,8 +2,8 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-      uri: ${MONGODB_URI}
-      database: ${MONGO_DB_NAME}
+      uri: ${SPRING_DATA_MONGODB_URI}
+      database: ${SPRING_DATA_MONGODB_DATABASE}
   main:
     allow-circular-references: true
 
