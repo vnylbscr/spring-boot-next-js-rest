@@ -2,7 +2,7 @@ spring:
   data:
     mongodb:
       auto-index-creation: true
-      uri: mongodb+srv://mert:mert123@cluster0.cfe3a.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+      uri: mongodb://localhost:27017
       database: spring-new-db
   main:
     allow-circular-references: true
