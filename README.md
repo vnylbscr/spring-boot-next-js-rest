@@ -5,8 +5,8 @@ A full stack rest app, you able to take notes, todos some stuffs. Written in Spr
 ## Technologies
 
 1. Spring Boot (Java)
-2. React (Next.js)
-3. MongoDB (MongoDB)
+2. React (Next.js, TypeScript, Chakra UI)
+3. MongoDB
 4. Heroku (Deployment)
 
 ## Deploy on Heroku
@@ -16,3 +16,7 @@ A full stack rest app, you able to take notes, todos some stuffs. Written in Spr
 ## Deploy on Vercel (Front End)
 
 [NoteStack App](https://notestack-client-next-js.vercel.app)
+
+[Front end repo](https://github.com/vnylbscr/notestack-client-next-js)
+
+
