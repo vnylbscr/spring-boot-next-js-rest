@@ -20,7 +20,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,7 +42,6 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping(value = "/login")
-    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
             authenticationManager.authenticate(
@@ -73,7 +71,6 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register")
-    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) throws ResponseException {
         if (registerRequest.getPassword() == null
                 || registerRequest.getEmail() == null
@@ -87,7 +84,6 @@ public class AuthController {
         return ResponseHandler.generateResponse("success", HttpStatus.OK, "ok");
     }
 
-    @CrossOrigin(origins = "http://localhost:3007", allowCredentials = "true")
     @GetMapping(value = "/verify")
     public ResponseEntity<?> verify(@CookieValue(name = "token", defaultValue = "") String cookieToken,
             HttpServletRequest request, HttpServletResponse response) throws ResponseException {

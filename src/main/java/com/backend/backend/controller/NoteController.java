@@ -12,7 +12,6 @@ import com.backend.backend.util.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,7 +31,6 @@ public class NoteController {
     @Autowired
     private NoteService noteService;
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping(value = "/getAll")
     public ResponseEntity<?> getAllNotes() {
         log.info("getAllNotes");
@@ -40,7 +38,6 @@ public class NoteController {
 
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping("/search")
     public ResponseEntity<?> searchNote(@RequestParam(value = "query", required = false) String search,
             @RequestParam(value = "user", required = false) String userId) {
@@ -49,14 +46,12 @@ public class NoteController {
                 this.noteService.searchNote(search, userId));
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping()
     public ResponseEntity<?> getSingleNote(@RequestParam String id) {
         log.info("getAllNotes");
         return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.getSingleNote(id));
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getUserNotes(@PathVariable String userId,
             @RequestParam(required = false) Boolean isDescending,
@@ -69,7 +64,6 @@ public class NoteController {
 
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/create")
     public ResponseEntity<?> createNote(@Valid @RequestBody CreateNoteDto noteDto) throws ResponseException {
         log.info("createNote color", noteDto.getColor());
@@ -77,7 +71,6 @@ public class NoteController {
                 this.noteService.createNote(noteDto));
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @DeleteMapping()
     public ResponseEntity<?> deleteNote(@Valid @RequestParam @NotBlank(message = "id can't be blank") String id) {
         return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
@@ -85,7 +78,6 @@ public class NoteController {
 
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/complete")
     public ResponseEntity<?> completeNote(@Valid @RequestParam String id) throws ResponseException {
         return ResponseHandler.generateResponse("success", HttpStatus.ACCEPTED,
@@ -93,7 +85,6 @@ public class NoteController {
 
     }
 
-    @CrossOrigin(origins = { "http://localhost:3007" })
     @PostMapping("/updateNote")
     public ResponseEntity<?> updateNote(@Valid @RequestBody UpdateNoteDto updateNoteDto) throws ResponseException {
         return ResponseHandler.generateResponse("success", HttpStatus.OK, this.noteService.updateNote(updateNoteDto));
